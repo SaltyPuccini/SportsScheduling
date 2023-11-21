@@ -12,27 +12,3 @@ TODO:
     Implement constraint validation and penalty counter for each constraint type
     Implement SA method to solve the timetable problem
     Implement GA method to solve the timetable roblem
-
-tSchedule Solution::generateInitialSolution() {
-    int meetingsPerTimeslot = mProblem.mTeams.size() / 2;
-    tSchedule schedule(mProblem.mSlots.size(), tMeetings(meetingsPerTimeslot));
-
-    for (int slot = 0; slot < mProblem.mSlots.size(); ++slot) {
-        for (int meeting = 0; meeting < meetingsPerTimeslot; ++meeting) {
-            int team1 = meeting * 2 % mProblem.mTeams.size();
-            int team2 = (mProblem.mTeams.size() - 1 - meeting * 2) % mProblem.mTeams.size();
-
-            schedule[slot][meeting] = {mProblem.mTeams[team1], mProblem.mTeams[team2]};
-
-            ++team1;
-            ++team2;
-
-            if (team1 == mProblem.mTeams.size()) team1 = 0;
-            if (team2 == mProblem.mTeams.size()) team2 = 0;
-
-            mProblem.mTeams[team1 - 1] = team2;
-            mProblem.mTeams[team2 - 1] = team1;
-        }
-    }
-    return schedule;
-}

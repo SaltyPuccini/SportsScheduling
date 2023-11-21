@@ -1,4 +1,3 @@
-#include "Problem.h"
 #include "XMLParser/XMLParser.h"
 #include "Solver.h"
 
@@ -8,6 +7,7 @@ int main() {
     XMLParser parser;
     parser.parseXML("../instance.xml", solver.mProblem);
     solver.initiateSolution();
+    solver.randomSolution(10);
 
 
 
