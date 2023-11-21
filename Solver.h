@@ -3,10 +3,9 @@
 
 class Solver {
 public:
-    Solver(Problem problem);
     virtual ~Solver();
+    void initiateSolution();
 
-private:
     Problem mProblem;
-
+    Solution mSolution;
 };

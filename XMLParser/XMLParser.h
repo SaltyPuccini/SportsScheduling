@@ -16,5 +16,5 @@ class XMLParser {
     void parseConstraints(std::vector<std::shared_ptr<IConstraint>> &constraints, const pugi::xml_document &doc);
 
 public:
-    Problem* parseXML(const std::string& filename);
+    void parseXML(const std::string& filename, Problem &problem);
 };

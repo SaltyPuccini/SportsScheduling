@@ -402,7 +402,7 @@ void XMLParser::parseConstraints(std::vector<std::shared_ptr<IConstraint>> &cons
 
 
 
-Problem *XMLParser::parseXML(const std::string &filename) {
+void XMLParser::parseXML(const std::string &filename, Problem &problem) {
     pugi::xml_document doc;
     pugi::xml_parse_result result = doc.load_file(filename.c_str());
 
@@ -418,7 +418,9 @@ Problem *XMLParser::parseXML(const std::string &filename) {
         std::cerr << "Failed to load XML file: " << result.description() << std::endl;
     }
 
-    return new Problem(teams, slots, constraints);
+    problem.mTeams = teams;
+    problem.mSlots = slots;
+    problem.mConstraints = constraints;
 }
 
 
