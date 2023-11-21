@@ -1,0 +1,14 @@
+create Problem instance by using XMLParser, so we have Problem object with all defined teams, timeslots and constraints
+
+create Solver instance and pass the reference to the Problem, so we know what we're working on
+Solver solver = new Solver(problem)
+solver.solve()
+
+save results to csv file
+- for GA: population;best;average;worst;
+- for SA: overallLoop;overallBest;current;
+
+TODO:
+    Implement constraint validation and penalty counter for each constraint type
+    Implement SA method to solve the timetable problem
+    Implement GA method to solve the timetable problem
