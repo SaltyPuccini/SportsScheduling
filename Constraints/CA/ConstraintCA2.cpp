@@ -9,6 +9,7 @@ ConstraintCA2::ConstraintCA2(int max, int min, Mode mode1, Mode mode2,
 ConstraintCA2::~ConstraintCA2() {
 }
 
-bool ConstraintCA2::isViolated(Solution) const {
+bool ConstraintCA2::isViolated(Solution &solution) const {
     return false;
 }
+

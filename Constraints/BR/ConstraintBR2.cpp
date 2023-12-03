@@ -10,6 +10,6 @@ ConstraintBR2::ConstraintBR2(int intp, Mode &homeMode, Mode &mode2, int penalty,
 ConstraintBR2::~ConstraintBR2() {
 }
 
-bool ConstraintBR2::isViolated(Solution) const {
+bool ConstraintBR2::isViolated(Solution &solution) const {
     return false;
 }

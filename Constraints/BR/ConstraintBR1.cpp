@@ -9,6 +9,7 @@ ConstraintBR1::ConstraintBR1(int intp, Mode mode1, Mode mode2, int penalty, cons
 // Destructor
 ConstraintBR1::~ConstraintBR1() {}
 
-bool ConstraintBR1::isViolated(Solution) const {
+bool ConstraintBR1::isViolated(Solution &solution) const {
     return false;
 }
+

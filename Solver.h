@@ -8,5 +8,5 @@ public:
     void randomSolution(int repetition);
 
     Problem mProblem;
-    Solution mSolution;
+    std::vector<Solution> mSolutions;
 };

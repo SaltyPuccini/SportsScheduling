@@ -7,5 +7,5 @@
 class IConstraint {
 public:
     virtual ~IConstraint() = default;
-    virtual bool isViolated(Solution solution) const = 0;
+    virtual bool isViolated(Solution &solution) const = 0;
 };

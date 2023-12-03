@@ -34,7 +34,9 @@ void Solver::initiateSolution() {
         std::rotate(teams.begin() + 1, teams.begin() + numTeams - 1, teams.end());
     }
 
-    mSolution.setMSchedule(schedule);
+    Solution solution;
+    solution.setMSchedule(schedule);
+    mSolutions.push_back(solution);
 
 }
 
@@ -68,11 +70,11 @@ void Solver::randomSolution(int repetition) {
                 overallLoop++;
             }
         }
-        auto temp = schedule;
+        Solution solution;
+        solution.setMSchedule(schedule);
+        solution.mFitness = 0;
+        mSolutions.push_back(solution);
     }
-
-
-
 }
 
 

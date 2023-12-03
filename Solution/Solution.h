@@ -7,7 +7,7 @@ public:
     void setMSchedule(const tSchedule &schedule);
 
     tSchedule mSchedule;
-    float mFitness;
+    float mFitness = 0;
 /*
     schedule[n] to inaczej slot = n
 

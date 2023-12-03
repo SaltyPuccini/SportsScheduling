@@ -19,5 +19,5 @@ public:
     // Destructor
     ~ConstraintBR1();
 
-    bool isViolated(Solution) const override;
+    bool isViolated(Solution &solution) const override;
 };

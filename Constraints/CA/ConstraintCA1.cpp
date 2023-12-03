@@ -10,6 +10,7 @@ ConstraintCA1::ConstraintCA1(int max, int min, Mode mode, int penalty, const std
 ConstraintCA1::~ConstraintCA1() {
 }
 
-bool ConstraintCA1::isViolated(Solution) const {
+bool ConstraintCA1::isViolated(Solution &solution) const {
     return false;
 }
+

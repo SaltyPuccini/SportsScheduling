@@ -20,5 +20,5 @@ public:
     ~ConstraintCA1();
 
     // Violation check
-    bool isViolated(Solution) const override;
+    bool isViolated(Solution &solution) const override;
 };

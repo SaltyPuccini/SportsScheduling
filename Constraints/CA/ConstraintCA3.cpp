@@ -9,6 +9,7 @@ ConstraintCA3::ConstraintCA3(int intp, int max, int min, Mode mode1, Mode mode2,
 ConstraintCA3::~ConstraintCA3() {
 }
 
-bool ConstraintCA3::isViolated(Solution) const {
+bool ConstraintCA3::isViolated(Solution &solution) const {
     return false;
 }
+

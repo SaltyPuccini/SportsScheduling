@@ -9,6 +9,6 @@ ConstraintCA4::ConstraintCA4(int max, int min, Mode mode1, Mode mode2,
 ConstraintCA4::~ConstraintCA4() {
 }
 
-bool ConstraintCA4::isViolated(Solution) const {
+bool ConstraintCA4::isViolated(Solution &solution) const {
     return false;
 }

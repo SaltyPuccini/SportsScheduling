@@ -12,6 +12,6 @@ ConstraintFA2::~ConstraintFA2() {
 
 }
 
-bool ConstraintFA2::isViolated(Solution) const {
+bool ConstraintFA2::isViolated(Solution &solution) const {
     return false;
 }
