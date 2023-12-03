@@ -13,6 +13,7 @@ bool ConstraintSE1::isViolated(Solution &solution) const {
     int numberOfViolations = 0;
     for (int i = 0; i < mTeams.size(); i++) {
         for (int j = i+1; j < mTeams.size(); j++) {
+
             //tutaj mamy wszystkie pary drużyn
             //chcemy znalezc slot dla ich 1 meczu, zapisac, potem slot dla 2 i policzyc roznice
 
