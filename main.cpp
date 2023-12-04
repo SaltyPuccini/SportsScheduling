@@ -6,7 +6,7 @@ int main() {
         Solver solver;
         XMLParser parser;
         parser.parseXML("../early1.xml", solver.mProblem);
-        solver.initiateSolution();
+        solver.initiateSolution(1);
         //solver.randomSolution(10);
 
         for (auto constraint:solver.mProblem.mConstraints){

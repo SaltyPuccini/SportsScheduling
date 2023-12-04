@@ -7,7 +7,7 @@ Solver::~Solver() {
 }
 
 
-void Solver::initiateSolution() {
+void Solver::initiateRandomSolution(int seed) {
     int meetingsPerTimeslot = mProblem.mTeams.size() / 2;
     tSchedule schedule(mProblem.mSlots.size(), tMeetings(meetingsPerTimeslot));
 
@@ -35,46 +35,11 @@ void Solver::initiateSolution() {
     }
 
     Solution solution;
+
+    std::mt19937 mt(seed);
+    std::shuffle(schedule.begin(), schedule.begin() + rounds / 2, mt);
+    std::shuffle(schedule.begin() + rounds / 2, schedule.end(), mt);
+
     solution.setMSchedule(schedule);
     mSolutions.push_back(solution);
-
 }
-
-
-void Solver::randomSolution(int repetition) {
-
-    int rounds = (mProblem.mTeams.size() - 1) * 2;
-    int size = mProblem.mTeams.size();
-
-    int meetingsPerTimeslot = mProblem.mTeams.size() / 2;
-    tSchedule schedule(mProblem.mSlots.size(), tMeetings(meetingsPerTimeslot));
-
-
-    std::vector<Meeting> possibleMeetings;
-    for (int i = 0; i < size; ++i) {
-        for (int j = i + 1; j < size; ++j) {
-            Meeting m1 = {i, j};
-            Meeting m2 = {j, i};
-            possibleMeetings.push_back(m1);
-            possibleMeetings.push_back(m2);
-        }
-    }
-
-    for (int seed = 0; seed < repetition; ++seed) {
-        std::mt19937 mt(seed);
-        std::shuffle(possibleMeetings.begin(), possibleMeetings.end(), mt);
-        int overallLoop = 0;
-        for (int round = 0; round < rounds; ++round) {
-            for (int game = 0; game < meetingsPerTimeslot; ++game) {
-                schedule[round][game] = possibleMeetings[overallLoop];
-                overallLoop++;
-            }
-        }
-        Solution solution;
-        solution.setMSchedule(schedule);
-        solution.mFitness = 0;
-        mSolutions.push_back(solution);
-    }
-}
-
-

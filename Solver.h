@@ -4,9 +4,10 @@
 class Solver {
 public:
     virtual ~Solver();
-    void initiateSolution();
-    void randomSolution(int repetition);
+    void initiateRandomSolution(int seed);
 
     Problem mProblem;
     std::vector<Solution> mSolutions;
+
+
 };
