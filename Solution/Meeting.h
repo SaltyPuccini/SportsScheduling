@@ -18,14 +18,14 @@ struct Meeting {
         return ((home == team) || (away == team));
     }
 
-    Mode homeOrAway(const int &team) {
+    bool isHome(const int &team) {
         if (home == team) {
-            return H;
-        } else if (away == team){
-            return A;
+            return true;
+        } else {
+            return false;
         }
-        return NONE;
     }
+
 
 };
 

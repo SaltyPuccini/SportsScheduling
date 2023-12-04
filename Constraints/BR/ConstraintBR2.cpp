@@ -13,19 +13,19 @@ ConstraintBR2::~ConstraintBR2() {
 bool ConstraintBR2::isViolated(Solution &solution) const {
 
     int breaks = 0;
-    Mode previousRound, currentRound;
+    bool previousRound, currentRound;
     for (auto team: mTeams) {
         for (auto slot: mSlots) {
             if (slot != 0) {
                 for (auto meeting: solution.mSchedule[slot - 1]) {
                     if (meeting.meetingContains(team)) {
-                        previousRound = meeting.homeOrAway(team);
+                        previousRound = meeting.isHome(team);
                         break;
                     }
                 }
                 for (auto meeting: solution.mSchedule[slot]) {
                     if (meeting.meetingContains(team)) {
-                        currentRound = meeting.homeOrAway(team);
+                        currentRound = meeting.isHome(team);
                         break;
                     }
                 }

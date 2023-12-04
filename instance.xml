@@ -863,6 +863,7 @@
             <BR1 intp="1" mode1="LEQ" mode2="HA" penalty="1" slotGroups="" slots="5;16;25" teamGroups="" teams="11" type="HARD"/>
             <BR1 intp="2" mode1="LEQ" mode2="HA" penalty="1" slotGroups="" slots="1;4;5;8;16;18" teamGroups="" teams="6" type="HARD"/>
             <BR1 intp="2" mode1="LEQ" mode2="HA" penalty="1" slotGroups="" slots="1;8;11;22;24;28" teamGroups="" teams="13" type="HARD"/>
+            <BR2 intp="14" homeMode="HA" mode2="LEQ" penalty="10" slotGroups="" slots="2;3;4;5;6;1;10;11;12;13;14;7;0;9;18;19;20;21;22;15;8;17;26;27;28;29;23;16;25;24" teamGroups="" teams="10;11;12;13;14;7;9;15;8;4;1;2;3;5;6;0" type="SOFT"/>
         </BreakConstraints>
         <FairnessConstraints>
             <FA2 intp="2" mode="H" penalty="10" slotGroups="" slots="0;1;2;3;4;5;6;7;8;9;10;11;12;13;14;15;16;17;18;19;20;21;22;23;24;25;26;27;28;29" teamGroups="" teams="0;1;2;3;4;5;6;7;8;9;10;11;12;13;14;15" type="SOFT"/>

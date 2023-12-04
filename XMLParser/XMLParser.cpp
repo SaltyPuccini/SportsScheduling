@@ -6,6 +6,7 @@
 #include "../Constraints/CA/ConstraintCA2.h"
 #include "../Constraints/CA/ConstraintCA3.h"
 #include "../Constraints/CA/ConstraintCA4.h"
+#include "../Constraints/PhasedConstraint.h"
 
 void parseLocalSlots(std::vector<int> &slots, pugi::xml_node constraintNode) {
     std::string slotsStr = constraintNode.attribute("slots").as_string();
@@ -48,7 +49,7 @@ void parseLocalMode(Mode &modeType, pugi::xml_node constraintNode, const char *m
             modeType = EVERY;
         } else if (type == "GLOBAL") {
             modeType = GLOBAL;
-        }else if (type == "SLOTS") {
+        } else if (type == "SLOTS") {
             modeType = SLOTS;
         }
     }
@@ -85,8 +86,8 @@ void parseLocalMeetings(tMeetings &meetings, pugi::xml_node constraintNode) {
 }
 
 
-
-void parseGameConstraints(const pugi::xml_node &gameConstraintsNode, std::vector<std::shared_ptr<IConstraint>> &constraints) {
+void parseGameConstraints(const pugi::xml_node &gameConstraintsNode,
+                          std::vector<std::shared_ptr<IConstraint>> &constraints) {
     for (pugi::xml_node constraintNode = gameConstraintsNode.child(
             "GA1"); constraintNode; constraintNode = constraintNode.next_sibling("GA1")) {
 
@@ -111,7 +112,8 @@ void parseGameConstraints(const pugi::xml_node &gameConstraintsNode, std::vector
     }
 }
 
-void parseBreakConstraints(const pugi::xml_node &breakConstraintsNode, std::vector<std::shared_ptr<IConstraint>> &constraints) {
+void parseBreakConstraints(const pugi::xml_node &breakConstraintsNode,
+                           std::vector<std::shared_ptr<IConstraint>> &constraints) {
     //BR1
     for (pugi::xml_node constraintNode = breakConstraintsNode.child(
             "BR1"); constraintNode; constraintNode = constraintNode.next_sibling("BR1")) {
@@ -173,8 +175,9 @@ void parseBreakConstraints(const pugi::xml_node &breakConstraintsNode, std::vect
     }
 }
 
-void parseSeparationConstraints(const pugi::xml_node &breakConstraintsNode, std::vector<std::shared_ptr<IConstraint>> &constraints) {
-    for (pugi::xml_node constraintNode = breakConstraintsNode.child(
+void parseSeparationConstraints(const pugi::xml_node &separationConstraintsNode,
+                                std::vector<std::shared_ptr<IConstraint>> &constraints) {
+    for (pugi::xml_node constraintNode = separationConstraintsNode.child(
             "SE1"); constraintNode; constraintNode = constraintNode.next_sibling("SE1")) {
 
         int min = constraintNode.attribute("min").as_int();
@@ -198,8 +201,9 @@ void parseSeparationConstraints(const pugi::xml_node &breakConstraintsNode, std:
     }
 }
 
-void parseFairnessConstraints(const pugi::xml_node &breakConstraintsNode, std::vector<std::shared_ptr<IConstraint>> &constraints) {
-    for (pugi::xml_node constraintNode = breakConstraintsNode.child(
+void parseFairnessConstraints(const pugi::xml_node &fairnessConstraintsNode,
+                              std::vector<std::shared_ptr<IConstraint>> &constraints) {
+    for (pugi::xml_node constraintNode = fairnessConstraintsNode.child(
             "FA2"); constraintNode; constraintNode = constraintNode.next_sibling("FA2")) {
 
         int intp = constraintNode.attribute("intp").as_int();
@@ -227,9 +231,10 @@ void parseFairnessConstraints(const pugi::xml_node &breakConstraintsNode, std::v
     }
 }
 
-void parseCapacityConstraints(const pugi::xml_node &breakConstraintsNode, std::vector<std::shared_ptr<IConstraint>> &constraints){
+void parseCapacityConstraints(const pugi::xml_node &capacityConstraintsNode,
+                              std::vector<std::shared_ptr<IConstraint>> &constraints) {
     //CA1
-    for (pugi::xml_node constraintNode = breakConstraintsNode.child(
+    for (pugi::xml_node constraintNode = capacityConstraintsNode.child(
             "CA1"); constraintNode; constraintNode = constraintNode.next_sibling("CA1")) {
 
         int max = constraintNode.attribute("max").as_int();
@@ -255,7 +260,7 @@ void parseCapacityConstraints(const pugi::xml_node &breakConstraintsNode, std::v
     }
 
     //CA2
-    for (pugi::xml_node constraintNode = breakConstraintsNode.child(
+    for (pugi::xml_node constraintNode = capacityConstraintsNode.child(
             "CA2"); constraintNode; constraintNode = constraintNode.next_sibling("CA2")) {
 
         int max = constraintNode.attribute("max").as_int();
@@ -284,11 +289,12 @@ void parseCapacityConstraints(const pugi::xml_node &breakConstraintsNode, std::v
 
         // Create ConstraintCA2 object and add to constraints vector
         constraints.push_back(
-                std::make_shared<ConstraintCA2>(max, min, mode1, mode2, penalty, slots, teams1, teams2, constraintType));
+                std::make_shared<ConstraintCA2>(max, min, mode1, mode2, penalty, slots, teams1, teams2,
+                                                constraintType));
     }
 
     //CA3
-    for (pugi::xml_node constraintNode = breakConstraintsNode.child(
+    for (pugi::xml_node constraintNode = capacityConstraintsNode.child(
             "CA3"); constraintNode; constraintNode = constraintNode.next_sibling("CA3")) {
 
         int max = constraintNode.attribute("max").as_int();
@@ -321,7 +327,7 @@ void parseCapacityConstraints(const pugi::xml_node &breakConstraintsNode, std::v
     }
 
     //CA4
-    for (pugi::xml_node constraintNode = breakConstraintsNode.child(
+    for (pugi::xml_node constraintNode = capacityConstraintsNode.child(
             "CA4"); constraintNode; constraintNode = constraintNode.next_sibling("CA4")) {
 
         int max = constraintNode.attribute("max").as_int();
@@ -353,13 +359,23 @@ void parseCapacityConstraints(const pugi::xml_node &breakConstraintsNode, std::v
 
         // Create ConstraintCA3 object and add to constraints vector
         constraints.push_back(
-                std::make_shared<ConstraintCA4>(max, min, mode1, mode2, penalty, slots, teams1, teams2, constraintType));
+                std::make_shared<ConstraintCA4>(max, min, mode1, mode2, penalty, slots, teams1, teams2,
+                                                constraintType));
     }
 
 
 }
 
+void XMLParser::parsePhased(const pugi::xml_document &doc, std::vector<std::shared_ptr<IConstraint>> &constraints,
+                            std::vector<int> teams,
+                            std::vector<int> slots) {
+    pugi::xml_node formatNode = doc.child("Instance").child("Structure").child("Format");
+    std::string gameMode = formatNode.child_value("gameMode");
+    if (gameMode == "P") {
+        constraints.push_back(std::make_shared<PhasedConstraint>(teams, slots));
+    }
 
+}
 
 void XMLParser::parseTeams(std::vector<int> &teams, const pugi::xml_document &doc) {
     pugi::xml_node teamsNode = doc.child("Instance").child("Resources").child("Teams");
@@ -378,7 +394,8 @@ void XMLParser::parseSlots(std::vector<int> &slots, const pugi::xml_document &do
     }
 }
 
-void XMLParser::parseConstraints(std::vector<std::shared_ptr<IConstraint>> &constraints, const pugi::xml_document &doc) {
+void
+XMLParser::parseConstraints(std::vector<std::shared_ptr<IConstraint>> &constraints, const pugi::xml_document &doc) {
 
     pugi::xml_node constraintsNode = doc.child("Instance").child("Constraints");
 
@@ -401,7 +418,6 @@ void XMLParser::parseConstraints(std::vector<std::shared_ptr<IConstraint>> &cons
 }
 
 
-
 void XMLParser::parseXML(const std::string &filename, Problem &problem) {
     pugi::xml_document doc;
     pugi::xml_parse_result result = doc.load_file(filename.c_str());
@@ -413,6 +429,7 @@ void XMLParser::parseXML(const std::string &filename, Problem &problem) {
     if (result) {
         parseTeams(teams, doc);
         parseSlots(slots, doc);
+        parsePhased(doc, constraints, teams, slots);
         parseConstraints(constraints, doc);
     } else {
         std::cerr << "Failed to load XML file: " << result.description() << std::endl;

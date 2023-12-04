@@ -11,18 +11,18 @@ ConstraintBR1::~ConstraintBR1() {}
 
 bool ConstraintBR1::isViolated(Solution &solution) const {
     int breaks = 0;
-    Mode previousRound, currentRound;
+    bool previousRound, currentRound;
     for (auto slot: mSlots) {
         if (slot != 0) {
             for (auto meeting: solution.mSchedule[slot - 1]) {
                 if (meeting.meetingContains(mTeams)) {
-                    previousRound = meeting.homeOrAway(mTeams);
+                    previousRound = meeting.isHome(mTeams);
                     break;
                 }
             }
             for (auto meeting: solution.mSchedule[slot]) {
                 if (meeting.meetingContains(mTeams)) {
-                    currentRound = meeting.homeOrAway(mTeams);
+                    currentRound = meeting.isHome(mTeams);
                     break;
                 }
             }
