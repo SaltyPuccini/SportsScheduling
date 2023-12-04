@@ -10,6 +10,46 @@ ConstraintCA2::~ConstraintCA2() {
 }
 
 bool ConstraintCA2::isViolated(Solution &solution) const {
+    int gamesPlayed = 0;
+    for (auto slot: mSlots){
+        switch (mMode1) {
+            case H:
+                for (int i = 0; i < solution.mSchedule[slot].size(); i++){
+                    for (auto enemyTeam: mTeams2){
+                        if (solution.mSchedule[slot][i].isTrulyEqual({mTeams1, enemyTeam})){
+                            gamesPlayed ++;
+                        }
+                    }
+                }
+                break;
+            case A:
+                for (int i = 0; i < solution.mSchedule[slot].size(); i++){
+                    for (auto enemyTeam: mTeams2){
+                        if (solution.mSchedule[slot][i].isTrulyEqual({enemyTeam, mTeams1})){
+                            gamesPlayed ++;
+                        }
+                    }
+                }
+                break;
+            case HA:
+                for (int i = 0; i < solution.mSchedule[slot].size(); i++){
+                    for (auto enemyTeam: mTeams2){
+                        if (solution.mSchedule[slot][i].isPartiallyEqual({mTeams1, enemyTeam})){
+                            gamesPlayed ++;
+                        }
+                    }
+                }
+                break;
+            default:
+                break;
+        }
+    }
+
+    if (gamesPlayed > mMax){
+        solution.mFitness += (gamesPlayed - mMax) * mPenalty;
+        return true;
+    }
+
     return false;
 }
 

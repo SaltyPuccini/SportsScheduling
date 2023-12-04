@@ -5,5 +5,6 @@ enum Mode {
     LEQ,
     EVERY,
     GLOBAL,
-    SLOTS
+    SLOTS,
+    NONE,
 };

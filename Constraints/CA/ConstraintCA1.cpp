@@ -11,6 +11,33 @@ ConstraintCA1::~ConstraintCA1() {
 }
 
 bool ConstraintCA1::isViolated(Solution &solution) const {
+    int gamesPlayed = 0;
+    for (auto slot: mSlots){
+        switch (mMode) {
+            case H:
+                for (int i = 0; i < solution.mSchedule[slot].size(); i++){
+                    if (solution.mSchedule[slot][i].home == mTeams){
+                        gamesPlayed ++;
+                    }
+                }
+                break;
+            case A:
+                for (int i = 0; i < solution.mSchedule[slot].size(); i++){
+                    if (solution.mSchedule[slot][i].away == mTeams){
+                        gamesPlayed ++;
+                    }
+                }
+                break;
+            default:
+                break;
+        }
+    }
+
+    if (gamesPlayed > mMax){
+        solution.mFitness += (gamesPlayed - mMax) * mPenalty;
+        return true;
+    }
+
     return false;
 }
 

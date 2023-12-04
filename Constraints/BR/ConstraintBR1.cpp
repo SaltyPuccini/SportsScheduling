@@ -10,6 +10,32 @@ ConstraintBR1::ConstraintBR1(int intp, Mode mode1, Mode mode2, int penalty, cons
 ConstraintBR1::~ConstraintBR1() {}
 
 bool ConstraintBR1::isViolated(Solution &solution) const {
+    int breaks = 0;
+    Mode previousRound, currentRound;
+    for (auto slot: mSlots) {
+        if (slot != 0) {
+            for (auto meeting: solution.mSchedule[slot - 1]) {
+                if (meeting.meetingContains(mTeams)) {
+                    previousRound = meeting.homeOrAway(mTeams);
+                    break;
+                }
+            }
+            for (auto meeting: solution.mSchedule[slot]) {
+                if (meeting.meetingContains(mTeams)) {
+                    currentRound = meeting.homeOrAway(mTeams);
+                    break;
+                }
+            }
+            if (currentRound == previousRound) {
+                breaks++;
+            }
+        }
+    }
+
+    if (breaks > mIntp) {
+        solution.mFitness += (breaks - mIntp) * mPenalty;
+        return true;
+    }
     return false;
 }
 

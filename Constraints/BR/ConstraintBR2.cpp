@@ -11,5 +11,34 @@ ConstraintBR2::~ConstraintBR2() {
 }
 
 bool ConstraintBR2::isViolated(Solution &solution) const {
+
+    int breaks = 0;
+    Mode previousRound, currentRound;
+    for (auto team: mTeams) {
+        for (auto slot: mSlots) {
+            if (slot != 0) {
+                for (auto meeting: solution.mSchedule[slot - 1]) {
+                    if (meeting.meetingContains(team)) {
+                        previousRound = meeting.homeOrAway(team);
+                        break;
+                    }
+                }
+                for (auto meeting: solution.mSchedule[slot]) {
+                    if (meeting.meetingContains(team)) {
+                        currentRound = meeting.homeOrAway(team);
+                        break;
+                    }
+                }
+                if (currentRound == previousRound) {
+                    breaks++;
+                }
+            }
+        }
+    }
+
+    if (breaks > mIntp) {
+        solution.mFitness += (breaks - mIntp) * mPenalty;
+        return true;
+    }
     return false;
 }

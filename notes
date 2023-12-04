@@ -10,6 +10,6 @@ save results to csv file
 
 TODO:
     Parse isPhased info from XML
-    Implement constraint validation and penalty counter for each constraint type
+    Implement constraint validation and penalty counter for CA3, CA4 constraint type
     Implement SA method to solve the timetable problem
     Implement GA method to solve the timetable roblem
