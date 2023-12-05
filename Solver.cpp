@@ -7,7 +7,7 @@ Solver::~Solver() {
 }
 
 
-void Solver::initiateRandomSolution(int seed) {
+void Solver::initiateRandomSolution() {
     int meetingsPerTimeslot = mProblem.mTeams.size() / 2;
     tSchedule schedule(mProblem.mSlots.size(), tMeetings(meetingsPerTimeslot));
 
@@ -36,10 +36,55 @@ void Solver::initiateRandomSolution(int seed) {
 
     Solution solution;
 
-    std::mt19937 mt(seed);
+    std::mt19937 mt(mSeed);
     std::shuffle(schedule.begin(), schedule.begin() + rounds / 2, mt);
     std::shuffle(schedule.begin() + rounds / 2, schedule.end(), mt);
 
     solution.setMSchedule(schedule);
     mSolutions.push_back(solution);
+}
+
+void Solver::setSeed(int seed) {
+    mSeed = seed;
+}
+
+void Solver::swapRounds(Solution &solution) {
+    std::mt19937 gen(mSeed);
+    std::uniform_int_distribution<> dist(0, mProblem.mSlots.size() - 1);
+    int roundA = dist(gen);
+    int roundB = dist(gen);
+
+    auto temp = solution.mSchedule[roundA];
+    solution.mSchedule[roundA] = solution.mSchedule[roundB];
+    solution.mSchedule[roundB] = temp;
+}
+
+void Solver::swapTeams(Solution &solution) {
+    std::mt19937 gen(mSeed);
+    std::uniform_int_distribution<> dist(0, mProblem.mTeams.size() - 1);
+    int teamA = dist(gen);
+    int teamB = dist(gen);
+
+    for (auto round: solution.mSchedule) {
+        for (auto meeting: round)
+            meeting.swapTeams(teamA, teamB);
+    }
+}
+
+void Solver::swapHomes(Solution &solution) {
+    std::mt19937 gen(mSeed);
+    std::uniform_int_distribution<> dist(0, mProblem.mTeams.size() - 1);
+    int teamA = dist(gen);
+    int teamB = dist(gen);
+
+    for (auto round: solution.mSchedule) {
+        for (auto meeting: round)
+            if (meeting.isPartiallyEqual({teamA, teamB})) {
+                meeting.swapHomeAway();
+            }
+    }
+}
+
+void Solver::anneal() {
+
 }

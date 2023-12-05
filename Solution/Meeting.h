@@ -26,7 +26,28 @@ struct Meeting {
         }
     }
 
+    void swapHomeAway() {
+        auto temp = home;
+        home = away;
+        away = temp;
+    }
 
+    void swapTeams(int teamA, int teamB) {
+        if (meetingContains(teamA)){
+            if(isHome(teamA)){
+                home = teamB;
+            }else{
+                away = teamB;
+            }
+        }
+        if (meetingContains(teamB)){
+            if(isHome(teamB)){
+                home = teamA;
+            }else{
+                away = teamA;
+            }
+        }
+    }
 };
 
 typedef std::vector<Meeting> tMeetings;

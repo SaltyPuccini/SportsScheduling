@@ -39,4 +39,5 @@ add_executable(Implementacja_AOIN_P main.cpp
         XMLParser/pugiXML/pugixml.hpp
         Constraints/PhasedConstraint.cpp
         Constraints/PhasedConstraint.h
+        Solver.cpp
 )
