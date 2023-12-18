@@ -75,6 +75,8 @@ bool ConstraintCA3::isViolated(Solution &solution) const {
         }
     }
 
+    solution.mFitness += resultingPenalty;
+
     if (resultingPenalty > 0) {
         return true;
     }
