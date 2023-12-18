@@ -11,4 +11,5 @@ public:
     std::vector<std::shared_ptr<IConstraint>> mConstraints;
     std::vector<int> mTeams;
     std::vector<int> mSlots;
+    bool mIsPhased;
 };

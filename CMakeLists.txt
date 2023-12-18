@@ -40,4 +40,6 @@ add_executable(Implementacja_AOIN_P main.cpp
         Constraints/PhasedConstraint.cpp
         Constraints/PhasedConstraint.h
         Solver.cpp
+        Constraints/BasicConstraint.cpp
+        Constraints/BasicConstraint.h
 )

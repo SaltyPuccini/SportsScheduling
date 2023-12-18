@@ -8,6 +8,7 @@
 #include "../Constraints/CA/ConstraintCA3.h"
 #include "../Constraints/CA/ConstraintCA4.h"
 #include "../Constraints/PhasedConstraint.h"
+#include "../Constraints/BasicConstraint.h"
 
 void parseLocalSlots(std::vector<int> &slots, pugi::xml_node constraintNode) {
     std::string slotsStr = constraintNode.attribute("slots").as_string();
@@ -374,6 +375,9 @@ void XMLParser::parsePhased(const pugi::xml_document &doc, std::vector<std::shar
     std::string gameMode = formatNode.child_value("gameMode");
     if (gameMode == "P") {
         constraints.push_back(std::make_shared<PhasedConstraint>(teams, slots));
+        mIsPhased = true;
+    }else{
+        mIsPhased = false;
     }
 
 }
@@ -430,6 +434,9 @@ void XMLParser::parseXML(const std::string &filename, Problem &problem) {
     if (result) {
         parseTeams(teams, doc);
         parseSlots(slots, doc);
+
+        constraints.push_back(std::make_shared<BasicConstraint>(teams, slots));
+
         parsePhased(doc, constraints, teams, slots);
         parseConstraints(constraints, doc);
     } else {
@@ -469,7 +476,7 @@ std::vector<int> XMLParser::parseConfig(const std::string &weightFile) {
 void XMLParser::parse(const std::string &filename, const std::string &weightFile, Problem &problem) {
     std::vector<int> constraintsVector = parseConfig(weightFile);
     parseXML(filename, problem);
-
+    problem.mIsPhased = mIsPhased;
     for (auto constraint: problem.mConstraints) {
         constraint->mSoft = constraintsVector[0];
         constraint->mHard = constraintsVector[1];

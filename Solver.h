@@ -14,6 +14,7 @@ public:
     Problem mProblem;
     std::vector<Solution> mSolutions;
     int mSeed;
+    bool isPhased;
 
 
 };
