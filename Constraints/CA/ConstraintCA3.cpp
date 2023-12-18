@@ -10,8 +10,8 @@ ConstraintCA3::~ConstraintCA3() {
 }
 
 bool ConstraintCA3::isViolated(Solution &solution) const {
-    std::vector<int> gameVector(mTeams1.size(), 0);
-    std::vector<int> lastPlayed(mTeams1.size(), -1);
+    std::vector<int> gameVector(solution.mSchedule[0].size() * 2, 0);
+    std::vector<int> lastPlayed(solution.mSchedule[0].size() * 2, -1);
     for (int slot = 0; slot < solution.mSchedule.size(); slot++) {
         switch (mMode1) {
             case H:
@@ -19,10 +19,12 @@ bool ConstraintCA3::isViolated(Solution &solution) const {
                     for (auto homeTeam: mTeams1) {
                         for (auto enemyTeam: mTeams2) {
                             if (solution.mSchedule[slot][i].isTrulyEqual({homeTeam, enemyTeam})) {
+                                if (lastPlayed[homeTeam] == -1) {
+                                    gameVector[homeTeam] += 1;
+                                } else if (slot < lastPlayed[homeTeam] + mIntp) {
+                                    gameVector[homeTeam] += 1;
+                                }
                                 lastPlayed[homeTeam] = slot;
-                                if (slot < lastPlayed[homeTeam] + mIntp){
-                                        gameVector[homeTeam] += 1;
-                                    }
                             }
                         }
                     }
@@ -34,7 +36,7 @@ bool ConstraintCA3::isViolated(Solution &solution) const {
                         for (auto homeTeam: mTeams2) {
                             if (solution.mSchedule[slot][i].isTrulyEqual({homeTeam, enemyTeam})) {
                                 lastPlayed[enemyTeam] = slot;
-                                if (slot < lastPlayed[enemyTeam] + mIntp){
+                                if (slot < lastPlayed[enemyTeam] + mIntp) {
                                     gameVector[enemyTeam] += 1;
                                 }
                             }
@@ -48,7 +50,7 @@ bool ConstraintCA3::isViolated(Solution &solution) const {
                         for (auto enemyTeam: mTeams2) {
                             if (solution.mSchedule[slot][i].isPartiallyEqual({homeTeam, enemyTeam})) {
                                 lastPlayed[homeTeam] = slot;
-                                if (slot < lastPlayed[homeTeam] + mIntp){
+                                if (slot < lastPlayed[homeTeam] + mIntp) {
                                     gameVector[homeTeam] += 1;
                                 }
                             }
@@ -63,7 +65,7 @@ bool ConstraintCA3::isViolated(Solution &solution) const {
 
     int resultingPenalty = 0;
 
-    for (auto game : gameVector){
+    for (auto game: gameVector) {
         if (game > mMax) {
             if (mType == SOFT) {
                 resultingPenalty += (game - mMax) * (mPenalty * mSoft);

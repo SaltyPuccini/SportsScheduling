@@ -6,7 +6,7 @@ int main() {
     Solver solver;
 
     XMLParser parser;
-    parser.parse("../early1.xml", "../constraints.config", solver.mProblem);
+    parser.parse("../instance.xml", "../constraints.config", solver.mProblem);
 
     for (int i = 0 ; i < 10; i++){
         solver.setSeed(i);
