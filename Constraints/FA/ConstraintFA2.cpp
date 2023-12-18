@@ -44,8 +44,14 @@ bool ConstraintFA2::isViolated(Solution &solution) const {
                     max = std::abs(homeGames[slotId][i] - homeGames[slotId][j]);
                 }
             }
-            if (max > mIntp)
-                penalty += max * mPenalty;
+
+            if (max > mIntp){
+                if (mType == SOFT) {
+                    penalty += max * (mPenalty * mSoft);
+                } else {
+                    penalty += max * (mPenalty * mHard);
+                }
+            }
         }
     }
 

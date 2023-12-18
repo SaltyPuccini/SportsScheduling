@@ -19,8 +19,8 @@ class XMLParser {
                      std::vector<int> teams, std::vector<int> slots);
 
 public:
-    void parseXML(const std::string& filename, Problem &problem);
 
-
-
+    std::vector<int> parseConfig(const std::string &weightFile);
+    void parseXML(const std::string &filename, Problem &problem);
+    void parse(const std::string &filename, const std::string &weightFile, Problem &problem);
 };

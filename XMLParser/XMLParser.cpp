@@ -1,3 +1,4 @@
+#include <fstream>
 #include "XMLParser.h"
 #include "../Constraints/BR/ConstraintBR2.h"
 #include "../Constraints/SE1/ConstraintSE1.h"
@@ -438,6 +439,42 @@ void XMLParser::parseXML(const std::string &filename, Problem &problem) {
     problem.mTeams = teams;
     problem.mSlots = slots;
     problem.mConstraints = constraints;
+}
+
+std::vector<int> XMLParser::parseConfig(const std::string &weightFile) {
+    int hardConstraints = 5;
+    int softConstraints = 10;
+    std::ifstream configFile(weightFile);
+    std::string line;
+
+    if (configFile.is_open()) {
+        while (getline(configFile, line)) {
+            std::istringstream iss(line);
+            std::string key;
+            int value;
+
+            if (iss >> key >> value) {
+                if (key == "hardConstraints") {
+                    hardConstraints = value;
+                } else if (key == "softConstraints") {
+                    softConstraints = value;
+                }
+            }
+        }
+    }
+    std::vector<int> intVector = {softConstraints, hardConstraints};
+    return intVector;
+}
+
+void XMLParser::parse(const std::string &filename, const std::string &weightFile, Problem &problem) {
+    std::vector<int> constraintsVector = parseConfig(weightFile);
+    parseXML(filename, problem);
+
+    for (auto constraint: problem.mConstraints) {
+        constraint->mSoft = constraintsVector[0];
+        constraint->mHard = constraintsVector[1];
+    }
+
 }
 
 

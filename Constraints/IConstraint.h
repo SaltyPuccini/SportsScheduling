@@ -6,6 +6,11 @@
 
 class IConstraint {
 public:
+    int mSoft;
+    int mHard;
+    int mPenalty;
+    ConstraintType mType;
+
     virtual ~IConstraint() = default;
     virtual bool isViolated(Solution &solution) const = 0;
 };

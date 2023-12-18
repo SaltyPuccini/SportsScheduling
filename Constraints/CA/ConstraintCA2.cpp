@@ -11,31 +11,31 @@ ConstraintCA2::~ConstraintCA2() {
 
 bool ConstraintCA2::isViolated(Solution &solution) const {
     int gamesPlayed = 0;
-    for (auto slot: mSlots){
+    for (auto slot: mSlots) {
         switch (mMode1) {
             case H:
-                for (int i = 0; i < solution.mSchedule[slot].size(); i++){
-                    for (auto enemyTeam: mTeams2){
-                        if (solution.mSchedule[slot][i].isTrulyEqual({mTeams1, enemyTeam})){
-                            gamesPlayed ++;
+                for (int i = 0; i < solution.mSchedule[slot].size(); i++) {
+                    for (auto enemyTeam: mTeams2) {
+                        if (solution.mSchedule[slot][i].isTrulyEqual({mTeams1, enemyTeam})) {
+                            gamesPlayed++;
                         }
                     }
                 }
                 break;
             case A:
-                for (int i = 0; i < solution.mSchedule[slot].size(); i++){
-                    for (auto enemyTeam: mTeams2){
-                        if (solution.mSchedule[slot][i].isTrulyEqual({enemyTeam, mTeams1})){
-                            gamesPlayed ++;
+                for (int i = 0; i < solution.mSchedule[slot].size(); i++) {
+                    for (auto enemyTeam: mTeams2) {
+                        if (solution.mSchedule[slot][i].isTrulyEqual({enemyTeam, mTeams1})) {
+                            gamesPlayed++;
                         }
                     }
                 }
                 break;
             case HA:
-                for (int i = 0; i < solution.mSchedule[slot].size(); i++){
-                    for (auto enemyTeam: mTeams2){
-                        if (solution.mSchedule[slot][i].isPartiallyEqual({mTeams1, enemyTeam})){
-                            gamesPlayed ++;
+                for (int i = 0; i < solution.mSchedule[slot].size(); i++) {
+                    for (auto enemyTeam: mTeams2) {
+                        if (solution.mSchedule[slot][i].isPartiallyEqual({mTeams1, enemyTeam})) {
+                            gamesPlayed++;
                         }
                     }
                 }
@@ -45,8 +45,12 @@ bool ConstraintCA2::isViolated(Solution &solution) const {
         }
     }
 
-    if (gamesPlayed > mMax){
-        solution.mFitness += (gamesPlayed - mMax) * mPenalty;
+    if (gamesPlayed > mMax) {
+        if (mType == SOFT) {
+            solution.mFitness += (gamesPlayed - mMax) * (mPenalty * mSoft);
+        } else {
+            solution.mFitness += (gamesPlayed - mMax) * (mPenalty * mHard);
+        }
         return true;
     }
 

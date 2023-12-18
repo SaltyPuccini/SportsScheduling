@@ -6,25 +6,24 @@ ConstraintCA1::ConstraintCA1(int max, int min, Mode mode, int penalty, const std
           mSlots(slots), mTeams(teams), mType(type) {}
 
 
-
 ConstraintCA1::~ConstraintCA1() {
 }
 
 bool ConstraintCA1::isViolated(Solution &solution) const {
     int gamesPlayed = 0;
-    for (auto slot: mSlots){
+    for (auto slot: mSlots) {
         switch (mMode) {
             case H:
-                for (int i = 0; i < solution.mSchedule[slot].size(); i++){
-                    if (solution.mSchedule[slot][i].home == mTeams){
-                        gamesPlayed ++;
+                for (int i = 0; i < solution.mSchedule[slot].size(); i++) {
+                    if (solution.mSchedule[slot][i].home == mTeams) {
+                        gamesPlayed++;
                     }
                 }
                 break;
             case A:
-                for (int i = 0; i < solution.mSchedule[slot].size(); i++){
-                    if (solution.mSchedule[slot][i].away == mTeams){
-                        gamesPlayed ++;
+                for (int i = 0; i < solution.mSchedule[slot].size(); i++) {
+                    if (solution.mSchedule[slot][i].away == mTeams) {
+                        gamesPlayed++;
                     }
                 }
                 break;
@@ -33,8 +32,12 @@ bool ConstraintCA1::isViolated(Solution &solution) const {
         }
     }
 
-    if (gamesPlayed > mMax){
-        solution.mFitness += (gamesPlayed - mMax) * mPenalty;
+    if (gamesPlayed > mMax) {
+        if (mType == SOFT) {
+            solution.mFitness += (gamesPlayed - mMax) * (mPenalty * mSoft);
+        } else {
+            solution.mFitness += (gamesPlayed - mMax) * (mPenalty * mHard);
+        }
         return true;
     }
 

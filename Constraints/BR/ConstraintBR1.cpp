@@ -31,9 +31,12 @@ bool ConstraintBR1::isViolated(Solution &solution) const {
             }
         }
     }
-
     if (breaks > mIntp) {
-        solution.mFitness += (breaks - mIntp) * mPenalty;
+        if (mType == SOFT) {
+            solution.mFitness += (breaks - mIntp) * (mPenalty * mSoft);
+        } else {
+            solution.mFitness += (breaks - mIntp) * (mPenalty * mHard);
+        }
         return true;
     }
     return false;
