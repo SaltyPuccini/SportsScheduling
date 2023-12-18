@@ -12,6 +12,7 @@ bool BasicConstraint::isViolated(Solution &solution) const {
             gameVector[meeting.home] += 1;
             gameVector[meeting.away] += 1;
         }
+
         for (auto isPlayed: gameVector){
             if (isPlayed != 1){
                 return true;
