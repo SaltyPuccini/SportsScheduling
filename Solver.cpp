@@ -3,6 +3,7 @@
 #include <random>
 #include <unordered_map>
 #include <iostream>
+#include <fstream>
 #include "Solver.h"
 
 Solver::~Solver() {
@@ -300,7 +301,7 @@ void Solver::swapHomes(Solution &solution) {
 }
 
 void Solver::anneal() {
-    int number_of_definitions = 5;
+    int number_of_definitions = 3;
     int number_of_neighbours = 5 * number_of_definitions;
 
     initiateRandomSolution();
@@ -314,6 +315,7 @@ void Solver::anneal() {
     currSolution.setMFitness(mSolutions[0].mFitness);
 
     Solution bestNew;
+    unsigned int allCounter = 0;
 
 
     auto temperature = mProblem.mParams.tStart;
@@ -334,11 +336,10 @@ void Solver::anneal() {
 
             //Generuję sąsiedztwa
             for (int i = 0; i < number_of_neighbours / number_of_definitions; i++) {
-                partialSwapRounds(neighboursVector[i]);
-                swapTeams(neighboursVector[i + number_of_definitions]);
-                swapHomes(neighboursVector[i + number_of_definitions * 2]);
-                swapRounds(neighboursVector[i + number_of_definitions * 3]);
-                partialSwapTeams(neighboursVector[i + number_of_definitions * 4]);
+                swapTeams(neighboursVector[i]);
+                swapHomes(neighboursVector[i + number_of_definitions]);
+                swapRounds(neighboursVector[i + number_of_definitions * 2]);
+                //partialSwapRounds(neighboursVector[i + number_of_definitions * 4]);
             }
 
             //Ewaluuję każde sąsiedztwo
@@ -346,10 +347,15 @@ void Solver::anneal() {
                 evaluate(neighboursVector[i]);
             }
 
-            //Wybieram najlepsze z nowych rozwiązań.
-            bestNew.setMSchedule(neighboursVector[0].mSchedule);
-            bestNew.setMFitness(neighboursVector[0].mFitness);
+            //Wybieram losowe z nowych rozwiązań.
+//            std::uniform_int_distribution<> distNeigh(0, number_of_neighbours-1);
+//            int neighID = distNeigh(gen);
 
+
+            //Wybieram najlepsze z nowych rozwiązań.
+            int neighID = 0;
+            bestNew.setMSchedule(neighboursVector[neighID].mSchedule);
+            bestNew.setMFitness(neighboursVector[neighID].mFitness);
             for (int i = 0; i < neighboursVector.size(); i++) {
                 if (neighboursVector[i].mFitness < bestNew.mFitness) {
                     bestNew.setMSchedule(neighboursVector[i].mSchedule);
@@ -378,7 +384,9 @@ void Solver::anneal() {
                     currSolution.setMFitness(bestNew.mFitness);
                 }
             }
+            allCounter++;
             innerLoopCounter++;
+
             //Zwalniam pamięć
             neighboursVector.clear();
 

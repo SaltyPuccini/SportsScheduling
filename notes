@@ -13,5 +13,5 @@ if phased, constraints[1] is phasedConstraint
 both returning only true/false
 
 TODO:
-    Implement neighbourhood - 6 definitions (3/6)
-    Implement SA method to solve the timetable problem
+    Implement neighbourhood - 6 definitions (4/6)
+    Save iteration info to .csv
