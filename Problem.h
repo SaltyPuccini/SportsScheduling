@@ -2,6 +2,7 @@
 
 #include <memory>
 #include "Constraints/IConstraint.h"
+#include "paramsSA.h"
 
 class Problem {
 public:
@@ -12,4 +13,5 @@ public:
     std::vector<int> mTeams;
     std::vector<int> mSlots;
     bool mIsPhased;
+    paramsSA mParams;
 };

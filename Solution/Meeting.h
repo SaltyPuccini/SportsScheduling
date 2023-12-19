@@ -18,6 +18,12 @@ struct Meeting {
         return ((home == team) || (away == team));
     }
 
+    int whoIsEnemy(const int &team) {
+        if (home == team)
+            return away;
+        return home;
+    }
+
     bool isHome(const int &team) {
         if (home == team) {
             return true;
@@ -32,19 +38,34 @@ struct Meeting {
         away = temp;
     }
 
-    void swapTeams(int teamA, int teamB) {
-        if (meetingContains(teamA)){
-            if(isHome(teamA)){
+    void swapTeams(int &teamA, int &teamB) {
+
+        if (meetingContains(teamA) && meetingContains(teamB)) {
+            if (isHome(teamA)) {
                 home = teamB;
-            }else{
+                away = teamA;
+            } else {
+                home = teamA;
                 away = teamB;
             }
-        }
-        if (meetingContains(teamB)){
-            if(isHome(teamB)){
-                home = teamA;
-            }else{
-                away = teamA;
+        } else {
+
+            bool recently_swapped = false;
+
+            if (meetingContains(teamA)) {
+                if (isHome(teamA)) {
+                    home = teamB;
+                } else {
+                    away = teamB;
+                }
+                recently_swapped = true;
+            }
+            if (meetingContains(teamB) and !recently_swapped) {
+                if (isHome(teamB)) {
+                    home = teamA;
+                } else {
+                    away = teamA;
+                }
             }
         }
     }

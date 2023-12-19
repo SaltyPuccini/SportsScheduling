@@ -5,6 +5,15 @@
 #include "pugiXML/pugixml.hpp"
 #include "../Constraints/GA/ConstraintGA1.h"
 #include "../Constraints/BR/ConstraintBR1.h"
+#include "../Constraints/BR/ConstraintBR2.h"
+#include "../Constraints/SE1/ConstraintSE1.h"
+#include "../Constraints/FA/ConstraintFA2.h"
+#include "../Constraints/CA/ConstraintCA1.h"
+#include "../Constraints/CA/ConstraintCA2.h"
+#include "../Constraints/CA/ConstraintCA3.h"
+#include "../Constraints/CA/ConstraintCA4.h"
+#include "../Constraints/PhasedConstraint.h"
+#include "../Constraints/BasicConstraint.h"
 #include "../Problem.h"
 
 class XMLParser {
@@ -22,5 +31,6 @@ public:
     bool mIsPhased;
     std::vector<int> parseConfig(const std::string &weightFile);
     void parseXML(const std::string &filename, Problem &problem);
-    void parse(const std::string &filename, const std::string &weightFile, Problem &problem);
+    void parse(const std::string &filename, const std::string &weightFile, const std::string &SAFile, Problem &problem);
+    bool parseSAConfig(const std::string &filename, paramsSA &params);
 };

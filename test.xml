@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Instance>
+  <MetaData>
+    <InstanceName>Early 1</InstanceName>
+    <DataType>A</DataType>
+    <Contributor>ITC2021</Contributor>
+    <Date year="2020" month="10"/>
+  </MetaData>
+  <Structure>
+    <Format leagueIds="0">
+      <numberRoundRobin>2</numberRoundRobin>
+      <compactness>C</compactness>
+      <gameMode>P</gameMode>
+    </Format>
+  </Structure>
+  <ObjectiveFunction>
+    <Objective>SC</Objective>
+  </ObjectiveFunction>
+  <Resources>
+    <Leagues>
+      <league id="0" name="League 0"/>
+    </Leagues>
+    <Teams>
+      <team id="0" league="0" name="Team 0"/>
+      <team id="1" league="0" name="Team 1"/>
+      <team id="2" league="0" name="Team 2"/>
+      <team id="3" league="0" name="Team 3"/>
+    </Teams>
+    <Slots>
+      <slot id="0" name="Slot 0"/>
+      <slot id="1" name="Slot 1"/>
+      <slot id="2" name="Slot 2"/>
+      <slot id="3" name="Slot 3"/>
+      <slot id="4" name="Slot 4"/>
+      <slot id="5" name="Slot 5"/>
+    </Slots>
+  </Resources>s
+  <Constraints>
+    <BasicConstraints/>
+    <CapacityConstraints>
+      <CA1 max="0" min="0" mode="A" penalty="1" slots="1" teams="0" type="HARD"/>
+      <CA1 max="0" min="0" mode="A" penalty="1" slots="1;2;3;4,5" teams="3" type="HARD"/>
+      <CA1 max="0" min="0" mode="A" penalty="1" slots="3" teams="2" type="HARD"/>
+      <CA1 max="1" min="0" mode="A" penalty="1" slots="4;1" teams="1" type="HARD"/>
+      <CA1 max="0" min="0" mode="H" penalty="1" slots="2" teams="4" type="HARD"/>
+      <CA1 max="1" min="0" mode="H" penalty="1" slots="2;4;0" teams="1" type="HARD"/>
+      <CA1 max="0" min="0" mode="A" penalty="1" slots="0" teams="1" type="HARD"/>
+    </CapacityConstraints>
+    <GameConstraints>
+    </GameConstraints>
+    <BreakConstraints>
+    </BreakConstraints>
+    <FairnessConstraints>
+    </FairnessConstraints>
+    <SeparationConstraints>
+    </SeparationConstraints>
+  </Constraints>
+</Instance>

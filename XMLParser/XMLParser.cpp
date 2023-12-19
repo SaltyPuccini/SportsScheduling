@@ -1,14 +1,6 @@
 #include <fstream>
 #include "XMLParser.h"
-#include "../Constraints/BR/ConstraintBR2.h"
-#include "../Constraints/SE1/ConstraintSE1.h"
-#include "../Constraints/FA/ConstraintFA2.h"
-#include "../Constraints/CA/ConstraintCA1.h"
-#include "../Constraints/CA/ConstraintCA2.h"
-#include "../Constraints/CA/ConstraintCA3.h"
-#include "../Constraints/CA/ConstraintCA4.h"
-#include "../Constraints/PhasedConstraint.h"
-#include "../Constraints/BasicConstraint.h"
+
 
 void parseLocalSlots(std::vector<int> &slots, pugi::xml_node constraintNode) {
     std::string slotsStr = constraintNode.attribute("slots").as_string();
@@ -473,15 +465,46 @@ std::vector<int> XMLParser::parseConfig(const std::string &weightFile) {
     return intVector;
 }
 
-void XMLParser::parse(const std::string &filename, const std::string &weightFile, Problem &problem) {
+bool XMLParser:: parseSAConfig(const std::string& filename, paramsSA& params) {
+
+    std::ifstream file(filename);
+    if (file.is_open()) {
+        std::string line;
+        while (std::getline(file, line)) {
+            std::istringstream iss(line);
+            std::string key;
+            float value;
+
+            if (iss >> key >> value) {
+                if (key == "tStart") {
+                    params.tStart = value;
+                } else if (key == "tMin") {
+                    params.tMin = value;
+                } else if (key == "coolingRate") {
+                    params.coolingRate = value;
+                } else if (key == "innerLoop") {
+                    params.innerLoop = static_cast<int>(value);
+                }
+            }
+        }
+        file.close();
+        return true;
+    } else {
+        std::cerr << "Unable to open file: " << filename << std::endl;
+        return false;
+    }
+}
+
+
+void XMLParser::parse(const std::string &filename, const std::string &weightFile, const std::string &SAFile, Problem &problem) {
     std::vector<int> constraintsVector = parseConfig(weightFile);
     parseXML(filename, problem);
+    parseSAConfig(SAFile, problem.mParams);
     problem.mIsPhased = mIsPhased;
     for (auto constraint: problem.mConstraints) {
         constraint->mSoft = constraintsVector[0];
         constraint->mHard = constraintsVector[1];
     }
-
 }
 
 
