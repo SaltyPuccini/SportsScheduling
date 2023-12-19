@@ -8,14 +8,13 @@ public:
 
     virtual ~Solver();
     void initiateRandomSolution();
-    void setSeed(int seed);
     void anneal();
 
     void fixPhase(Solution &solution);
-//    void fixBasic(Solution &solution);
-//    void partialSwapRounds(Solution &solution);
-//    void partialSwapTeams(Solution &solution);
-//    void partialSwapTeamsPhased(Solution &solution);
+
+    void partialSwapRounds(Solution &solution);
+    void partialSwapTeams(Solution &solution);
+    void partialSwapTeamsPhased(Solution &solution);
 
     void evaluate(Solution &solution);
 

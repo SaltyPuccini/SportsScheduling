@@ -441,8 +441,8 @@ void XMLParser::parseXML(const std::string &filename, Problem &problem) {
 }
 
 std::vector<int> XMLParser::parseConfig(const std::string &weightFile) {
-    int hardConstraints = 5;
-    int softConstraints = 10;
+    int hardConstraints = 1;
+    int softConstraints = 1;
     std::ifstream configFile(weightFile);
     std::string line;
 
