@@ -47,20 +47,6 @@ void Solver::initiateRandomSolution() {
 }
 
 
-bool areDuplicatesInVector(std::vector<int> vector) {
-    std::unordered_map<int, int> map;
-    for (size_t i = 0; i < vector.size(); ++i) {
-        if (vector[i] != -1) {
-            if (map.find(vector[i]) != map.end()) {
-                return map[vector[i]];
-            } else {
-                map[vector[i]] = i;
-            }
-        }
-    }
-    return -1;
-}
-
 bool containsValue(const std::vector<int> &numbers, int valueToFind) {
     for (int number: numbers) {
         if (number == valueToFind) {
@@ -124,8 +110,6 @@ void Solver::partialSwapRounds(Solution &solution) {
     }
 
 
-
-
     for (auto team: teams) {
         for (int meetingA = 0; meetingA < solution.mSchedule[roundA].size(); meetingA++) {
             if (solution.mSchedule[roundA][meetingA].meetingContains(team)) {
@@ -153,6 +137,8 @@ void Solver::partialSwapTeams(Solution &solution) {
 
     int roundsNumber = distRounds(gen);
     std::vector<int> rounds;
+    std::vector<int> finalRounds;
+    std::vector<int> enemies;
     int tempRound;
 
     for (int i = 0; i < roundsNumber; i++) {
@@ -162,46 +148,79 @@ void Solver::partialSwapTeams(Solution &solution) {
         rounds.push_back(tempRound);
     }
 
-    std::vector<int> enemiesA(mProblem.mSlots.size(), -1);
-    std::vector<int> enemiesB(mProblem.mSlots.size(), -1);
 
-
-    //Znajduję przeciwników teamuA i teamuB
-    for (int round = 0; round < rounds.size(); round++) {
-        for (auto meeting: solution.mSchedule[round]) {
+    for (int r = 0; r < rounds.size(); r++) {
+        for (auto meeting: solution.mSchedule[rounds[r]]) {
             if (meeting.meetingContains(teamA)) {
-                enemiesA[round] = meeting.whoIsEnemy(teamA);
-                enemiesB[round] = meeting.whoIsEnemy(teamB);
-
+                enemies.push_back(meeting.whoIsEnemy(teamA));
+            }
+            if (meeting.meetingContains(teamB)) {
+                enemies.push_back(meeting.whoIsEnemy(teamB));
             }
         }
     }
 
-    //Z rund usuwam te, wśród których są duplikaty przeciwników teamuA
-    int temp;
-    do {
-        temp = areDuplicatesInVector(enemiesA);
-        if (temp != -1) {
-            enemiesA.erase(enemiesA.begin() + temp);
-            enemiesB.erase(enemiesB.begin() + temp);
+    std::sort(enemies.begin(), enemies.end());
+    enemies.erase(std::unique(enemies.begin(), enemies.end()), enemies.end());
+    std::vector<int> enemiesCounter(enemies.size(), 0);
+
+
+    for (int r = 0; r < rounds.size(); r++) {
+        for (int e = 0; e < enemies.size(); e++) {
+            for (auto meeting: solution.mSchedule[rounds[r]]) {
+                if (meeting.isPartiallyEqual({teamA, enemies[e]})) {
+                    enemiesCounter[e] += 1;
+                }
+                if (meeting.isPartiallyEqual({teamB, enemies[e]})) {
+                    enemiesCounter[e] -= 1;
+                }
+            }
         }
-    } while (temp != -1);
+    }
 
-    //Z rund usuwam te, wśród których są duplikaty przeciwników teamuB
-    do {
-        temp = areDuplicatesInVector(enemiesB);
-        if (temp != -1) {
-            enemiesA.erase(enemiesA.begin() + temp);
-            enemiesB.erase(enemiesB.begin() + temp);
+    int en = 0;
+    while (en < enemies.size()) {
+        if (enemiesCounter[en] != 0) {
+            enemies.erase(enemies.begin() + en);
+        } else {
+            en++;
         }
-    } while (temp != -1);
+    }
+
+    for (int r = 0; r < rounds.size(); r++) {
+        for (int e = 0; e < enemies.size(); e++) {
+            for (auto meeting: solution.mSchedule[rounds[r]]) {
+                if (meeting.isPartiallyEqual({teamA, enemies[e]})) {
+                    finalRounds.push_back(rounds[r]);
+                }
+                if (meeting.isPartiallyEqual({teamB, enemies[e]})) {
+                    finalRounds.push_back(rounds[r]);
+                }
+            }
+        }
+    }
+
+    std::sort(finalRounds.begin(), finalRounds.end());
+    finalRounds.erase(std::unique(finalRounds.begin(), finalRounds.end()), finalRounds.end());
 
 
-    for (auto round: rounds) {
+
+    //each team tk , playing against teams ti, tj in the rounds
+    //in Rs, must play against both ti and tj exactly the same
+    //amount of times
+
+
+
+
+    for (auto round: finalRounds) {
         for (int i = 0; i < solution.mSchedule[round].size(); i++) {
             solution.mSchedule[round][i].swapTeams(teamA, teamB);
         }
     }
+    auto a = mProblem.mConstraints[0]->isViolated(solution);
+    std::cout<<a<<std::endl;
+
+
 }
 
 void Solver::partialSwapTeamsPhased(Solution &solution) {
@@ -281,8 +300,8 @@ void Solver::swapHomes(Solution &solution) {
 }
 
 void Solver::anneal() {
-    int number_of_neighbours = 15;
-    int no_definitions = 3;
+    int number_of_definitions = 5;
+    int number_of_neighbours = 5 * number_of_definitions;
 
     initiateRandomSolution();
 
@@ -304,7 +323,7 @@ void Solver::anneal() {
 
         int innerLoopCounter = 0;
         while (innerLoopCounter < mProblem.mParams.innerLoop) {
-//            std::cout<<currSolution.mFitness<<std::endl;
+            std::cout << currSolution.mFitness << std::endl;
 
             //Tworzę wektor z wieloma kopiami aktualnego rozwiązania
             for (int i = 0; i < number_of_neighbours; i++) {
@@ -314,10 +333,12 @@ void Solver::anneal() {
             }
 
             //Generuję sąsiedztwa
-            for (int i = 0; i < number_of_neighbours / no_definitions; i++) {
+            for (int i = 0; i < number_of_neighbours / number_of_definitions; i++) {
                 partialSwapRounds(neighboursVector[i]);
-                swapTeams(neighboursVector[i + no_definitions]);
-                swapHomes(neighboursVector[i + no_definitions * 2]);
+                swapTeams(neighboursVector[i + number_of_definitions]);
+                swapHomes(neighboursVector[i + number_of_definitions * 2]);
+                swapRounds(neighboursVector[i + number_of_definitions * 3]);
+                partialSwapTeams(neighboursVector[i + number_of_definitions * 4]);
             }
 
             //Ewaluuję każde sąsiedztwo
