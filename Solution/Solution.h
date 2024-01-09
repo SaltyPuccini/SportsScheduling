@@ -30,5 +30,6 @@ public:
     round 8     5:1, 4;2, 6;3
     round 9     6:1, 3;2, 5;4
  */
+    void copyMSchedule(const tSchedule schedule);
 };
 

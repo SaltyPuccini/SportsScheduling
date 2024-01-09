@@ -1,6 +1,7 @@
 #pragma once
 #include "Problem.h"
 #include <random>
+#include <unordered_set>
 
 class Solver {
 public:
@@ -29,7 +30,7 @@ public:
     std::mt19937 gen;
 
 
+    void teamsPlayOnlyInTs(Solution &solution, int ri, int rj, std::unordered_set<int> &Ts);
 
-
-
+    bool CanSwapTeams(const Solution &solution, int ti, int tj, const std::vector<int> &Rs);
 };

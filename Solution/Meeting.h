@@ -6,6 +6,10 @@ struct Meeting {
     int home;
     int away;
 
+    bool operator<(const Meeting& other) const {
+        return std::tie(home, away) < std::tie(other.home, other.away);
+    }
+
     bool isTrulyEqual(const Meeting &other) const {
         return (home == other.home) && (away == other.away);
     }
