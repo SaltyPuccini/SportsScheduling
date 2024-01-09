@@ -41,6 +41,7 @@ bool ConstraintBR2::isViolated(Solution &solution) const {
             solution.mFitness += (breaks - mIntp) * (mPenalty * mSoft);
         } else {
             solution.mFitness += (breaks - mIntp) * (mPenalty * mHard);
+            solution.setMHardViolation(true);
         }
         return true;
     }

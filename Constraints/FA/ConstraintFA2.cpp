@@ -49,6 +49,7 @@ bool ConstraintFA2::isViolated(Solution &solution) const {
                 if (mType == SOFT) {
                     penalty += max * (mPenalty * mSoft);
                 } else {
+                    solution.setMHardViolation(true);
                     penalty += max * (mPenalty * mHard);
                 }
             }

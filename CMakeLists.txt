@@ -28,19 +28,19 @@ add_executable(Implementacja_AOIN_P main.cpp
         Constraints/ConstraintType.h
         Solution/Meeting.h
         Constraints/Mode.h
-        XMLParser/XMLParser.cpp
-        XMLParser/XMLParser.h
         Problem.h
         Solver.cpp
         Solver.h
         Problem.cpp
-        XMLParser/pugiXML/pugiconfig.hpp
-        XMLParser/pugiXML/pugixml.cpp
-        XMLParser/pugiXML/pugixml.hpp
         Constraints/PhasedConstraint.cpp
         Constraints/PhasedConstraint.h
         Solver.cpp
         Constraints/BasicConstraint.cpp
         Constraints/BasicConstraint.h
         paramsSA.h
+        FileParser/FileParser.cpp
+        FileParser/FileParser.h
+        FileParser/pugiXML/pugixml.hpp
+        FileParser/pugiXML/pugixml.cpp
+        FileParser/pugiXML/pugiconfig.hpp
 )

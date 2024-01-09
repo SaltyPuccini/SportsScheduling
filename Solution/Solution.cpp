@@ -12,3 +12,7 @@ void Solution::setMFitness(const int fitness) {
     Solution::mFitness = fitness;
 }
 
+void Solution::setMHardViolation(bool violated) {
+    Solution::mHardViolation = violated;
+}
+

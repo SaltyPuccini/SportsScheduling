@@ -294,10 +294,12 @@ void Solver::anneal() {
     Solution bestGlobalSolution;
     bestGlobalSolution.setMSchedule(mSolutions[0].mSchedule);
     bestGlobalSolution.setMFitness(mSolutions[0].mFitness);
+    bestGlobalSolution.setMHardViolation(mSolutions[0].mHardViolation);
 
     Solution currSolution;
     currSolution.setMSchedule(mSolutions[0].mSchedule);
     currSolution.setMFitness(mSolutions[0].mFitness);
+    currSolution.setMHardViolation(mSolutions[0].mHardViolation);
 
     Solution bestNew;
     unsigned int allCounter = 0;
@@ -338,12 +340,14 @@ void Solver::anneal() {
             int bestID = 0;
             bestNew.setMSchedule(neighboursVector[neighID].mSchedule);
             bestNew.setMFitness(neighboursVector[neighID].mFitness);
+            bestNew.setMHardViolation(neighboursVector[neighID].mHardViolation);
 
 
             for (int i = 0; i < neighboursVector.size(); i++) {
                 if (neighboursVector[i].mFitness < bestNew.mFitness) {
                     bestNew.setMSchedule(neighboursVector[i].mSchedule);
                     bestNew.setMFitness(neighboursVector[i].mFitness);
+                    bestNew.setMHardViolation(neighboursVector[i].mHardViolation);
                     bestID = i;
                 }
             }
@@ -352,11 +356,13 @@ void Solver::anneal() {
             if (bestNew.mFitness < currSolution.mFitness) {
                 currSolution.setMSchedule(bestNew.mSchedule);
                 currSolution.setMFitness(bestNew.mFitness);
+                currSolution.setMHardViolation(bestNew.mHardViolation);
 
                 //Przy okazji sprawdzam, czy jest najlepszym globalnym rozwiązaniem
                 if (currSolution.mFitness < bestGlobalSolution.mFitness) {
                     bestGlobalSolution.setMSchedule(currSolution.mSchedule);
                     bestGlobalSolution.setMFitness(currSolution.mFitness);
+                    bestGlobalSolution.setMHardViolation(currSolution.mHardViolation);
                 }
             }
                 //w przeciwnym wypadku, akceptuję je jako nowe z pewną dozą prawdopodobieństwa
@@ -367,6 +373,7 @@ void Solver::anneal() {
                 if (randomNumber < valueToChangeSolution) {
                     currSolution.setMSchedule(bestNew.mSchedule);
                     currSolution.setMFitness(bestNew.mFitness);
+                    currSolution.setMHardViolation(bestNew.mHardViolation);
                 }
             }
             allCounter++;
@@ -381,6 +388,7 @@ void Solver::anneal() {
     }
     mSolutions[0].setMSchedule(bestGlobalSolution.mSchedule);
     mSolutions[0].setMFitness(bestGlobalSolution.mFitness);
+    mSolutions[0].setMHardViolation(bestGlobalSolution.mHardViolation);
 }
 
 void Solver::evaluate(Solution &solution) {

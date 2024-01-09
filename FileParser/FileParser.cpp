@@ -1,5 +1,5 @@
 #include <fstream>
-#include "XMLParser.h"
+#include "FileParser.h"
 
 
 void parseLocalSlots(std::vector<int> &slots, pugi::xml_node constraintNode) {
@@ -360,9 +360,9 @@ void parseCapacityConstraints(const pugi::xml_node &capacityConstraintsNode,
 
 }
 
-void XMLParser::parsePhased(const pugi::xml_document &doc, std::vector<std::shared_ptr<IConstraint>> &constraints,
-                            std::vector<int> teams,
-                            std::vector<int> slots) {
+void FileParser::parsePhased(const pugi::xml_document &doc, std::vector<std::shared_ptr<IConstraint>> &constraints,
+                             std::vector<int> teams,
+                             std::vector<int> slots) {
     pugi::xml_node formatNode = doc.child("Instance").child("Structure").child("Format");
     std::string gameMode = formatNode.child_value("gameMode");
     if (gameMode == "P") {
@@ -374,7 +374,7 @@ void XMLParser::parsePhased(const pugi::xml_document &doc, std::vector<std::shar
 
 }
 
-void XMLParser::parseTeams(std::vector<int> &teams, const pugi::xml_document &doc) {
+void FileParser::parseTeams(std::vector<int> &teams, const pugi::xml_document &doc) {
     pugi::xml_node teamsNode = doc.child("Instance").child("Resources").child("Teams");
     for (pugi::xml_node team = teamsNode.child("team"); team; team = team.next_sibling("team")) {
         int teamID = team.attribute("id").as_int();
@@ -383,7 +383,7 @@ void XMLParser::parseTeams(std::vector<int> &teams, const pugi::xml_document &do
 
 }
 
-void XMLParser::parseSlots(std::vector<int> &slots, const pugi::xml_document &doc) {
+void FileParser::parseSlots(std::vector<int> &slots, const pugi::xml_document &doc) {
     pugi::xml_node slotsNode = doc.child("Instance").child("Resources").child("Slots");
     for (pugi::xml_node slot = slotsNode.child("slot"); slot; slot = slot.next_sibling("slot")) {
         int slotID = slot.attribute("id").as_int();
@@ -392,7 +392,7 @@ void XMLParser::parseSlots(std::vector<int> &slots, const pugi::xml_document &do
 }
 
 void
-XMLParser::parseConstraints(std::vector<std::shared_ptr<IConstraint>> &constraints, const pugi::xml_document &doc) {
+FileParser::parseConstraints(std::vector<std::shared_ptr<IConstraint>> &constraints, const pugi::xml_document &doc) {
 
     pugi::xml_node constraintsNode = doc.child("Instance").child("Constraints");
 
@@ -415,7 +415,7 @@ XMLParser::parseConstraints(std::vector<std::shared_ptr<IConstraint>> &constrain
 }
 
 
-void XMLParser::parseXML(const std::string &filename, Problem &problem) {
+void FileParser::parseXML(const std::string &filename, Problem &problem) {
     pugi::xml_document doc;
     pugi::xml_parse_result result = doc.load_file(filename.c_str());
 
@@ -440,7 +440,7 @@ void XMLParser::parseXML(const std::string &filename, Problem &problem) {
     problem.mConstraints = constraints;
 }
 
-std::vector<int> XMLParser::parseConfig(const std::string &weightFile) {
+std::vector<int> FileParser::parseConfig(const std::string &weightFile) {
     int hardConstraints = 1;
     int softConstraints = 1;
     std::ifstream configFile(weightFile);
@@ -465,7 +465,7 @@ std::vector<int> XMLParser::parseConfig(const std::string &weightFile) {
     return intVector;
 }
 
-bool XMLParser:: parseSAConfig(const std::string& filename, paramsSA& params) {
+bool FileParser:: parseSAConfig(const std::string& filename, paramsSA& params) {
 
     std::ifstream file(filename);
     if (file.is_open()) {
@@ -496,7 +496,7 @@ bool XMLParser:: parseSAConfig(const std::string& filename, paramsSA& params) {
 }
 
 
-void XMLParser::parse(const std::string &filename, const std::string &weightFile, const std::string &SAFile, Problem &problem) {
+void FileParser::parse(const std::string &filename, const std::string &weightFile, const std::string &SAFile, Problem &problem) {
     std::vector<int> constraintsVector = parseConfig(weightFile);
     parseXML(filename, problem);
     parseSAConfig(SAFile, problem.mParams);

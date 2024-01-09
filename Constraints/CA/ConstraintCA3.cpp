@@ -71,6 +71,7 @@ bool ConstraintCA3::isViolated(Solution &solution) const {
                 resultingPenalty += (game - mMax) * (mPenalty * mSoft);
             } else {
                 resultingPenalty += (game - mMax) * (mPenalty * mHard);
+                solution.setMHardViolation(true);
             }
         }
     }

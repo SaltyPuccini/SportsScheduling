@@ -16,7 +16,7 @@
 #include "../Constraints/BasicConstraint.h"
 #include "../Problem.h"
 
-class XMLParser {
+class FileParser {
 
     void parseSlots(std::vector<int> &slots, const pugi::xml_document &doc);
 

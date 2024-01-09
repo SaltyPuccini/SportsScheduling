@@ -21,6 +21,7 @@ bool PhasedConstraint::isViolated(Solution &solution) const {
     for (auto gameDay: gameVector){
         for (auto game : gameDay){
             if (game != 1){
+                solution.mFitness += 10000;
                 return true;
             }
         }
@@ -39,6 +40,7 @@ bool PhasedConstraint::isViolated(Solution &solution) const {
     for (auto gameDay: gameVector){
         for (auto game : gameDay){
             if (game != 0){
+                solution.mFitness += 10000;
                 return true;
             }
         }
