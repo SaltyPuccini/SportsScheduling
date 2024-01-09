@@ -48,153 +48,111 @@ void Solver::initiateRandomSolution() {
     mSolutions.push_back(solution);
 }
 
-bool areSchedulesEqual(tSchedule &schedule1, tSchedule &schedule2, int ra, int rb) {
-    for (int j = 0; j < schedule1[ra].size(); ++j) {
-        if (!schedule1[ra][j].isTrulyEqual(schedule2[ra][j])) {
-            return false;
-        }
-        if (!schedule1[rb][j].isTrulyEqual(schedule2[rb][j])) {
-            return false;
+bool AreSchedulesEqual(const tSchedule& schedule1, const tSchedule& schedule2) {
+    for (size_t i = 0; i < schedule1.size(); ++i) {
+        const tMeetings& round1 = schedule1[i];
+        const tMeetings& round2 = schedule2[i];
+
+        for (size_t j = 0; j < round1.size(); ++j) {
+            const Meeting& meeting1 = round1[j];
+            const Meeting& meeting2 = round2[j];
+
+            if (meeting1.home != meeting2.home || meeting1.away != meeting2.away) {
+                return false;
+            }
         }
     }
 
     return true;
 }
 
+bool RefineTeamsSet(Solution& solution, int roundIndex, std::set<int>& Ts) {
+    bool any_change = false;
+    bool changed;
+    do {
+        changed = false;
+        std::set<int> newTs;
 
-void Solver::teamsPlayOnlyInTs(Solution &solution, int ra, int rb,
-                               std::unordered_set<int> &Ts) {
-    bool teamsRemoved = true;
-
-    while (teamsRemoved) {
-        teamsRemoved = false;
-
-        for (auto it = Ts.begin(); it != Ts.end();) {
-            int team = *it;
-            bool playsOnlyInTs = true;
-
-            // Sprawdzamy czy drużyna gra tylko z drużynami z Ts w rundzie ra
-            for (auto meeting: solution.mSchedule[ra]) {
-                if (meeting.meetingContains(team)) {
-                    if (Ts.find(meeting.whoIsEnemy(team)) == Ts.end()) {
-                        playsOnlyInTs = false;
-                        break;
-                    }
+        for (int team : Ts) {
+            bool validTeam = true;
+            for (const auto& meeting : solution.mSchedule[roundIndex]) {
+                if ((meeting.home == team && Ts.find(meeting.away) == Ts.end()) ||
+                    (meeting.away == team && Ts.find(meeting.home) == Ts.end())) {
+                    validTeam = false;
+                    break;
                 }
             }
-
-            // Sprawdzamy czy drużyna gra tylko z drużynami z Ts w rundzie rb
-            for (auto meeting: solution.mSchedule[rb]) {
-                if (meeting.meetingContains(team)) {
-                    if (Ts.find(meeting.whoIsEnemy(team)) == Ts.end()) {
-                        playsOnlyInTs = false;
-                        break;
-                    }
-                }
-            }
-
-            if (!playsOnlyInTs) {
-                it = Ts.erase(it); // Usuń drużynę z Ts
-                teamsRemoved = true;
+            if (validTeam) {
+                newTs.insert(team);
             } else {
-                ++it;
+                changed = true;
+                any_change = true;
             }
         }
-    }
+
+        Ts = newTs;
+    } while (changed && !Ts.empty());
+    return any_change;
 }
-
-
-bool pairCompare(const std::pair<int, int> &lhs, const std::pair<int, int> &rhs) {
-    return lhs.first < rhs.first || (lhs.first == rhs.first && lhs.second < rhs.second);
-}
-
 
 void Solver::partialSwapRounds(Solution &solution) {
     std::uniform_int_distribution<> distRounds(0, mProblem.mSlots.size() - 1);
-    std::uniform_int_distribution<> distTeamsCount(2, mProblem.mTeams.size() - 2);
+    std::uniform_int_distribution<> distTeamsCount(2, (mProblem.mTeams.size() - 2));
     std::uniform_int_distribution<> distTeams(0, (mProblem.mTeams.size() - 1));
 
-    Solution tempSolution;
-    tempSolution.copyMSchedule(solution.mSchedule);
+    Solution s;
+    s.copyMSchedule(solution.mSchedule);
 
     //Losowanie rund
-    int roundA, roundB;
+    int ri, rj;
     do {
-        roundA = distRounds(gen);
-        roundB = distRounds(gen);
-    } while (roundA == roundB);
+        ri = distRounds(gen);
+        rj = distRounds(gen);
+    } while (ri == rj);
 
 
     int teamsNumber = distTeamsCount(gen);
-    std::unordered_set<int> Ts;
-    int tempTeam;
 
-    //losowanie teamów
-    for (int i = 0; i < teamsNumber; i++) {
-        do {
-            tempTeam = distTeams(gen);
-        } while (std::find(Ts.begin(), Ts.end(), tempTeam) != Ts.end());
+    std::set<int> Ts;
+
+    while (Ts.size() < teamsNumber) {
+        int tempTeam = distTeams(gen);
         Ts.insert(tempTeam);
     }
+    bool changed;
+    do{
+        RefineTeamsSet(solution, ri, Ts);
+        if (Ts.empty()){
+            break;
+        }
+        changed = RefineTeamsSet(solution, rj, Ts);
+    }while (changed);
+    if (!Ts.empty()){
 
-    //modyfikujemy tak, że usuwamy teamy grające chociaż raz z kimkolwiek z poza TS
-    teamsPlayOnlyInTs(solution, roundA, roundB, Ts);
-    std::unordered_map<int, std::vector<int>> matchesRa, matchesRb;
 
-    //mapa meczy roundA
-    for (int matchIndex = 0; matchIndex < solution.mSchedule[roundA].size(); ++matchIndex) {
-        int team = solution.mSchedule[roundA][matchIndex].home;
-        if (Ts.find(team) != Ts.end()) {
-            matchesRa[team].push_back(matchIndex);
+        std::vector<Meeting*> meetingsToSwapRi;
+        for (auto& meeting : solution.mSchedule[ri]) {
+            if (Ts.find(meeting.home) != Ts.end() || Ts.find(meeting.away) != Ts.end()) {
+                meetingsToSwapRi.push_back(&meeting);
+            }
         }
 
-        team = solution.mSchedule[roundA][matchIndex].away;
-        if (Ts.find(team) != Ts.end()) {
-            matchesRa[team].push_back(matchIndex);
-        }
-    }
-
-    //mapa meczy roundB
-    for (int matchIndex = 0; matchIndex < solution.mSchedule[roundB].size(); ++matchIndex) {
-        int team = solution.mSchedule[roundB][matchIndex].home;
-        if (Ts.find(team) != Ts.end()) {
-            matchesRb[team].push_back(matchIndex);
+        // Znajdź mecze do zamiany w rundzie rj
+        std::vector<Meeting*> meetingsToSwapRj;
+        for (auto& meeting : solution.mSchedule[rj]) {
+            if (Ts.find(meeting.home) != Ts.end() || Ts.find(meeting.away) != Ts.end()) {
+                meetingsToSwapRj.push_back(&meeting);
+            }
         }
 
-        team = solution.mSchedule[roundB][matchIndex].away;
-        if (Ts.find(team) != Ts.end()) {
-            matchesRb[team].push_back(matchIndex);
-        }
-    }
 
-
-    std::set<std::pair<int, int>, decltype(&pairCompare)> swappedMatches(&pairCompare);
-
-    // Zamiana meczów pomiędzy ri i rj dla drużyn z Ts (tylko raz)
-    for (int team: Ts) {
-        if (matchesRa.find(team) != matchesRa.end() && matchesRb.find(team) != matchesRb.end()) {
-            // Swap only once if the pair hasn't been swapped before
-            for (int matchIndexRa: matchesRa[team]) {
-                int matchIndexRb = matchesRb[team][0]; // Take the first match in rj for simplicity
-
-                std::pair<int, int> forwardSwap = {matchIndexRa, matchIndexRb};
-                std::pair<int, int> backwardSwap = {matchIndexRb, matchIndexRa};
-                if (swappedMatches.find(forwardSwap) == swappedMatches.end() &&
-                    swappedMatches.find(backwardSwap) == swappedMatches.end()) {
-                    std::swap(solution.mSchedule[roundA][matchIndexRa], solution.mSchedule[roundB][matchIndexRb]);
-                    swappedMatches.insert(forwardSwap);
-                }
+        // Zamień mecze
+        if (meetingsToSwapRi.size() == meetingsToSwapRj.size()) {
+            for (size_t i = 0; i < meetingsToSwapRi.size(); ++i) {
+                std::swap(*meetingsToSwapRi[i], *meetingsToSwapRj[i]);
             }
         }
     }
-
-//    if (!Ts.empty()){
-//        auto temp = mProblem.mConstraints[0]->isViolated(solution);
-//        if (!areSchedulesEqual(solution.mSchedule, tempSolution.mSchedule, roundA, roundB)){
-//            std::cout << "Are equal: " << areSchedulesEqual(solution.mSchedule, tempSolution.mSchedule, roundA, roundB) << std::endl;
-//            std::cout << "Break rules: " << temp << std::endl;
-//        }
-//    }
 }
 
 
@@ -321,7 +279,7 @@ void Solver::swapHomes(Solution &solution) {
 
 void Solver::anneal() {
 //    int number_of_definitions = 1;
-    int number_of_definitions = 5;
+    int number_of_definitions = 4;
     int number_of_neighbours = 5 * number_of_definitions;
 
     std::random_device rd;
@@ -362,7 +320,6 @@ void Solver::anneal() {
                 swapHomes(neighboursVector[i + number_of_definitions]);
                 swapRounds(neighboursVector[i + number_of_definitions * 2]);
                 partialSwapRounds(neighboursVector[i + number_of_definitions * 3]);
-                partialSwapTeams(neighboursVector[i + number_of_definitions * 4]);
             }
 
             //Ewaluuję każde sąsiedztwo
@@ -386,14 +343,14 @@ void Solver::anneal() {
                 }
             }
 
-//            if (bestID<5)
-//                std::cout<<"SwapTeams"<<std::endl;
-//            else if (bestID<10)
-//                std::cout<<"swapHomes"<<std::endl;
-//            else if (bestID<15)
-//                std::cout<<"swapRounds"<<std::endl;
-//            else if (bestID<20)
-//                std::cout<<"partialSwapRounds"<<std::endl;
+            if (bestID<5)
+                std::cout<<"SwapTeams"<<std::endl;
+            else if (bestID<10)
+                std::cout<<"swapHomes"<<std::endl;
+            else if (bestID<15)
+                std::cout<<"swapRounds"<<std::endl;
+            else if (bestID<20)
+                std::cout<<"partialSwapRounds"<<std::endl;
 
             //Jeśli nowe najlepsze, jest lepsze niż aktualne, akceptuję je jako currSolution
             if (bestNew.mFitness < currSolution.mFitness) {
