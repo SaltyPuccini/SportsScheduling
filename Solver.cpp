@@ -40,9 +40,8 @@ void Solver::initiateRandomSolution() {
 
     Solution solution;
 
-    std::mt19937 mt(mSeed);
-    std::shuffle(schedule.begin(), schedule.begin() + rounds / 2, mt);
-    std::shuffle(schedule.begin() + rounds / 2, schedule.end(), mt);
+    std::shuffle(schedule.begin(), schedule.begin() + rounds / 2, gen);
+    std::shuffle(schedule.begin() + rounds / 2, schedule.end(), gen);
 
     solution.setMSchedule(schedule);
     evaluate(solution);
@@ -229,17 +228,7 @@ void Solver::partialSwapTeams(Solution &solution, bool phased) {
             }
         }
     }
-
-    auto temp = mProblem.mConstraints[0]->isViolated(solution);
-    auto temp1 = AreSchedulesEqual(s.mSchedule, solution.mSchedule);
-    auto temp2 = 3;
 }
-
-
-void Solver::partialSwapTeamsPhased(Solution &solution) {
-
-}
-
 
 void Solver::swapRounds(Solution &solution) {
     std::uniform_int_distribution<> dist(0, mProblem.mSlots.size() - 1);
@@ -352,6 +341,8 @@ void Solver::anneal() {
                 }
             }
 
+            std::cout<<bestNew.mFitness<<std::endl;
+
             //Jeśli nowe najlepsze, jest lepsze niż aktualne, akceptuję je jako currSolution
             if (bestNew.mFitness < currSolution.mFitness) {
                 currSolution.setMSchedule(bestNew.mSchedule);
@@ -378,7 +369,9 @@ void Solver::anneal() {
             }
             allCounter++;
             innerLoopCounter++;
-            std::cout << bestGlobalSolution.mFitness << std::endl;
+
+            mCurr.push_back(currSolution.mFitness);
+            mBest.push_back(bestGlobalSolution.mFitness);
 
             //Zwalniam pamięć
             neighboursVector.clear();
@@ -395,4 +388,9 @@ void Solver::evaluate(Solution &solution) {
     for (auto constraint: mProblem.mConstraints) {
         constraint->isViolated(solution);
     }
+}
+
+void Solver::initiateGlobalRNG(int seed) {
+    mSeed = seed;
+    gen.seed(mSeed);
 }

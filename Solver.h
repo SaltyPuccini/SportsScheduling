@@ -11,11 +11,8 @@ public:
     void initiateRandomSolution();
     void anneal();
 
-    void fixPhase(Solution &solution);
-
+    void initiateGlobalRNG(int seed);
     void partialSwapRounds(Solution &solution);
-    void partialSwapTeams(Solution &solution);
-    void partialSwapTeamsPhased(Solution &solution);
 
     void evaluate(Solution &solution);
 
@@ -26,13 +23,11 @@ public:
     Problem mProblem;
     std::vector<Solution> mSolutions;
     int mSeed;
-    bool isPhased;
     std::mt19937 gen;
+    std::vector<float> mCurr;
+    std::vector<float> mBest;
 
 
-    void teamsPlayOnlyInTs(Solution &solution, int ri, int rj, std::unordered_set<int> &Ts);
-
-    bool CanSwapTeams(const Solution &solution, int ti, int tj, const std::vector<int> &Rs);
 
     void partialSwapTeams(Solution &solution, bool phased);
 };
