@@ -71,7 +71,6 @@ bool ConstraintCA3::isViolated(Solution &solution) const {
                 resultingPenalty += (game - mMax) * (mPenalty * mSoft);
             } else {
                 resultingPenalty += (game - mMax) * (mPenalty * mHard);
-                solution.setMHardViolation(true);
             }
         }
     }
@@ -84,3 +83,8 @@ bool ConstraintCA3::isViolated(Solution &solution) const {
     return false;
 }
 
+bool ConstraintCA3::isHard() const {
+    if (mType == HARD)
+        return true;
+    return false;
+}

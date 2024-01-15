@@ -14,3 +14,14 @@ both returning only true/false
 
 TODO:
     Save iteration info to .csv
+
+Sparametryzować!!!
+
+Ilość iteracji z góry określona! Temperatura mierzona przy okazji.
+
+Tylko 4 parametry
+Iteracje, Sąsiedzi, TempP, Cooling Rate
+cooling rate : czwarte, piąte miejsce po przecinku
+Na wykresie SA najlepszy, najgorszy, średni sąsiad.
+
+proporcjonalne sąsiedztwo

@@ -1,4 +1,5 @@
 #include <fstream>
+#include <iomanip>
 #include "FileParser.h"
 
 
@@ -366,9 +367,9 @@ void FileParser::parsePhased(const pugi::xml_document &doc, std::vector<std::sha
     pugi::xml_node formatNode = doc.child("Instance").child("Structure").child("Format");
     std::string gameMode = formatNode.child_value("gameMode");
     if (gameMode == "P") {
-        constraints.push_back(std::make_shared<PhasedConstraint>(teams, slots));
+        constraints.push_back(std::make_shared<PhasedConstraint>(teams, slots, HARD));
         mIsPhased = true;
-    }else{
+    } else {
         mIsPhased = false;
     }
 
@@ -427,7 +428,7 @@ void FileParser::parseXML(const std::string &filename, Problem &problem) {
         parseTeams(teams, doc);
         parseSlots(slots, doc);
 
-        constraints.push_back(std::make_shared<BasicConstraint>(teams, slots));
+        constraints.push_back(std::make_shared<BasicConstraint>(teams, slots, HARD));
 
         parsePhased(doc, constraints, teams, slots);
         parseConstraints(constraints, doc);
@@ -465,7 +466,10 @@ std::vector<int> FileParser::parseConfig(const std::string &weightFile) {
     return intVector;
 }
 
-bool FileParser:: parseSAConfig(const std::string& filename, paramsSA& params) {
+bool FileParser::parseSAConfig(const std::string &filename, paramsSA &params, std::vector<int> &intVector) {
+
+    int hardConstraints = 1;
+    int softConstraints = 1;
 
     std::ifstream file(filename);
     if (file.is_open()) {
@@ -478,16 +482,21 @@ bool FileParser:: parseSAConfig(const std::string& filename, paramsSA& params) {
             if (iss >> key >> value) {
                 if (key == "tStart") {
                     params.tStart = value;
-                } else if (key == "tMin") {
-                    params.tMin = value;
+                } else if (key == "iterations") {
+                    params.iterations = value;
                 } else if (key == "coolingRate") {
                     params.coolingRate = value;
-                } else if (key == "innerLoop") {
-                    params.innerLoop = static_cast<int>(value);
+                } else if (key == "neighbourhoodSize") {
+                    params.neighbourhoodSize = value;
+                } else if (key == "hardConstraints") {
+                    hardConstraints = value;
+                } else if (key == "softConstraints") {
+                    softConstraints = value;
                 }
             }
         }
         file.close();
+        intVector = {softConstraints, hardConstraints};
         return true;
     } else {
         std::cerr << "Unable to open file: " << filename << std::endl;
@@ -496,15 +505,37 @@ bool FileParser:: parseSAConfig(const std::string& filename, paramsSA& params) {
 }
 
 
-void FileParser::parse(const std::string &filename, const std::string &weightFile, const std::string &SAFile, Problem &problem) {
-    std::vector<int> constraintsVector = parseConfig(weightFile);
+void FileParser::parse(const std::string &filename, const std::string &SAFile, Problem &problem) {
+    std::vector<int> constraintsVector;
     parseXML(filename, problem);
-    parseSAConfig(SAFile, problem.mParams);
+    parseSAConfig(SAFile, problem.mParams, constraintsVector);
     problem.mIsPhased = mIsPhased;
     for (auto constraint: problem.mConstraints) {
         constraint->mSoft = constraintsVector[0];
         constraint->mHard = constraintsVector[1];
     }
+}
+
+void FileParser::saveResults(const std::string &nameOnlyXML, const std::string &nameOnlyConfig, int runNumber,
+                             const Solver &solver) {
+    std::string resultsFile = nameOnlyXML + "_" + nameOnlyConfig + "_" + std::to_string(runNumber) + ".csv";
+    std::ofstream file(resultsFile);
+
+    file << "overallLoop,temperature,curr,bestFromNew,avgFromNew,worstFromNew,overallBest\n";
+
+    // Check if all vectors have the same size
+    size_t n = solver.mBest.size();
+    // Write the data
+    for (size_t line = 0; line < n; line++) {
+        file << line << ","
+             << std::setprecision(4) << solver.mTemperatureArchive[line] << ","
+             << solver.mCurr[line] << ","
+             << solver.mBestFromNew[line] << ","
+             << solver.mAvgFromNew[line] << ","
+             << solver.mWorstFromNew[line] << ","
+             << solver.mBest[line] << "\n";
+    }
+    file.close();
 }
 
 

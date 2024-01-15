@@ -1,7 +1,7 @@
 #include "PhasedConstraint.h"
 
-PhasedConstraint::PhasedConstraint(const std::vector<int> teams, const std::vector<int> slots) : mTeams(teams),
-                                                                                                 mSlots(slots) {}
+PhasedConstraint::PhasedConstraint(const std::vector<int> teams, const std::vector<int> slots, ConstraintType constraintType) : mTeams(teams),
+                                                                                                 mSlots(slots), mType(constraintType) {}
 PhasedConstraint::~PhasedConstraint() {}
 
 bool PhasedConstraint::isViolated(Solution &solution) const {
@@ -21,7 +21,6 @@ bool PhasedConstraint::isViolated(Solution &solution) const {
     for (auto gameDay: gameVector){
         for (auto game : gameDay){
             if (game != 1){
-                solution.mFitness += 10000;
                 return true;
             }
         }
@@ -40,12 +39,18 @@ bool PhasedConstraint::isViolated(Solution &solution) const {
     for (auto gameDay: gameVector){
         for (auto game : gameDay){
             if (game != 0){
-                solution.mFitness += 10000;
+                solution.mFitness += mHard;
                 return true;
             }
         }
     }
 
 
+    return false;
+}
+
+bool PhasedConstraint::isHard() const {
+    if (mType == HARD)
+        return true;
     return false;
 }

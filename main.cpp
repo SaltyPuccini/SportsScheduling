@@ -1,34 +1,54 @@
 #include <fstream>
+#include <iomanip>
+#include <chrono>
 #include "FileParser/FileParser.h"
-#include "Solver.h"
+#include "SimulatedAnnealing/Solver.h"
 
-int main() {
+int main(int argc, char *argv[]) {
+
+    if (argc != 4) {
+        std::cerr << "Usage: " << argv[0] << " <XML file> <config file> <run number>\n";
+        return 1;
+    }
+
+    std::string xmlFile = argv[1];
+    std::string configFile = argv[2];
+    int runCount;
+
+    runCount = std::stoi(argv[3]);
+
+
+    size_t dotPositionXML = xmlFile.rfind('.');
+    std::string nameOnlyXML = xmlFile.substr(0, dotPositionXML);
+
+    size_t dotPositionConfig = xmlFile.rfind('.');
+    std::string nameOnlyConfig = xmlFile.substr(0, dotPositionConfig);
 
     Solver solver;
-
     FileParser parser;
-    parser.parse("../Late4.xml", "../w.weights", "../SA.config", solver.mProblem);
+    parser.parse(xmlFile, configFile, solver.mProblem);
 
-    for (int i = 0; i < 3; i++) {
-        solver.initiateGlobalRNG(0);
+    for (int i = 0; i < runCount; i++) {
+        solver.initiateGlobalRNG(i);
+
+        auto start = std::chrono::high_resolution_clock::now();
         solver.anneal();
-        std::cout << solver.mSolutions[0].mHardViolation << std::endl;
-        std::ofstream file("../Late4_results_" + std::to_string(i) + ".csv");
+        auto end = std::chrono::high_resolution_clock::now();
+        std::chrono::duration<double> elapsed = end - start;
 
-        // Write CSV header
-        file << "overallLoop,current,overallBest\n";
-
-        // Write data
-        for (int j = 0; j < solver.mCurr.size(); j++) {
-            file << j << "," << solver.mCurr[j] << "," << solver.mBest[j] << "\n";
+        parser.saveResults(xmlFile, configFile, i, solver);
+        std::cout << solver.mSolution.mFitness << std::endl;
+        std::cout << "Is basic violated? " << solver.mProblem.mConstraints[0]->isViolated(solver.mSolution)
+                  << std::endl;
+        if (solver.mProblem.mIsPhased) {
+            std::cout << "Is phased violated? " << solver.mProblem.mConstraints[1]->isViolated(solver.mSolution)
+                      << std::endl;
         }
-        file.close();
-
-
-        solver.mCurr.clear();
-        solver.mBest.clear();
-        solver.mSolutions.clear();
-
+        std::cout << "Soft violations: " << solver.countSoftViolations()<< std::endl;
+        std::cout << "Hard violations: " << solver.countHardViolations()<< std::endl;
+        std::cout <<"Elapsed: "<<elapsed<< "[s]."<<std::endl;
+        std::cout << std::endl;
+        solver.clearArchive();
     }
 
 

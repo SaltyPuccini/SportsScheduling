@@ -3,15 +3,17 @@
 
 class BasicConstraint : public IConstraint {
 public:
-    BasicConstraint(const std::vector<int> teams, const std::vector<int> slots);
+    BasicConstraint(const std::vector<int> teams, const std::vector<int> slots, ConstraintType constraintType);
 
 
     std::vector<int> mTeams;
     std::vector<int> mSlots;
+    ConstraintType mType;
 
     // Destructor
     ~BasicConstraint();
 
     // Violation check
     bool isViolated(Solution &solution) const override;
+    bool isHard() const override;
 };

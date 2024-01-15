@@ -35,7 +35,6 @@ bool ConstraintGA1::isViolated(Solution &solution) const {
     int multiplier = mSoft;
     if (mType == HARD) {
         multiplier = mHard;
-        solution.setMHardViolation(true);
     }
 
     //if not, add penalty to the fitness of the solution and return info that the constraint indeed is violated
@@ -47,3 +46,8 @@ bool ConstraintGA1::isViolated(Solution &solution) const {
     return true;
 }
 
+bool ConstraintGA1::isHard() const {
+    if (mType == HARD)
+        return true;
+    return false;
+}

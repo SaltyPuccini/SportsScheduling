@@ -1,8 +1,8 @@
 #pragma once
 
 #include <memory>
-#include "Constraints/IConstraint.h"
-#include "paramsSA.h"
+#include "../Constraints/IConstraint.h"
+#include "../SimulatedAnnealing/paramsSA.h"
 
 class Problem {
 public:

@@ -20,5 +20,5 @@ public:
     ~ConstraintBR2();
 
     bool isViolated(Solution &solution) const override;
-
+    bool isHard() const override;
 };

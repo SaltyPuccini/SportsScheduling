@@ -37,7 +37,6 @@ bool ConstraintCA1::isViolated(Solution &solution) const {
             solution.mFitness += (gamesPlayed - mMax) * (mPenalty * mSoft);
         } else {
             solution.mFitness += (gamesPlayed - mMax) * (mPenalty * mHard);
-            solution.setMHardViolation(true);
         }
         return true;
     }
@@ -45,3 +44,8 @@ bool ConstraintCA1::isViolated(Solution &solution) const {
     return false;
 }
 
+bool ConstraintCA1::isHard() const {
+    if (mType == HARD)
+        return true;
+    return false;
+}

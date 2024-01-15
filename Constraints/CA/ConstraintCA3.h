@@ -23,4 +23,5 @@ public:
 
     // Violation check
     bool isViolated(Solution &solution) const override;
+    bool isHard() const override;
 };

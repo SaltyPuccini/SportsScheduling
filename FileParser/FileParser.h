@@ -1,4 +1,5 @@
 #pragma once
+
 #include <sstream>
 #include <iostream>
 #include <memory>
@@ -14,7 +15,8 @@
 #include "../Constraints/CA/ConstraintCA4.h"
 #include "../Constraints/PhasedConstraint.h"
 #include "../Constraints/BasicConstraint.h"
-#include "../Problem.h"
+#include "../Problem/Problem.h"
+#include "../SimulatedAnnealing/Solver.h"
 
 class FileParser {
 
@@ -29,8 +31,15 @@ class FileParser {
 
 public:
     bool mIsPhased;
+
     std::vector<int> parseConfig(const std::string &weightFile);
+
     void parseXML(const std::string &filename, Problem &problem);
-    void parse(const std::string &filename, const std::string &weightFile, const std::string &SAFile, Problem &problem);
-    bool parseSAConfig(const std::string &filename, paramsSA &params);
+
+    void parse(const std::string &filename, const std::string &SAFile, Problem &problem);
+
+    bool parseSAConfig(const std::string &filename, paramsSA &params, std::vector<int> &intVector);
+
+    void
+    saveResults(const std::string &nameOnlyXML, const std::string &nameOnlyConfig, int runNumber, const Solver &solver);
 };

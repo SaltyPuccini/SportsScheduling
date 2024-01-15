@@ -49,10 +49,15 @@ bool ConstraintSE1::isViolated(Solution &solution) const {
         int multiplier = mSoft;
         if (mType == HARD) {
             multiplier = mHard;
-            solution.setMHardViolation(true);
         }
 
         solution.mFitness += numberOfViolations * (mPenalty * multiplier);
         return true;
     }
+}
+
+bool ConstraintSE1::isHard() const {
+    if (mType == HARD)
+        return true;
+    return false;
 }

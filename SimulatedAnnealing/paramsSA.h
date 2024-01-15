@@ -1,6 +1,6 @@
 struct paramsSA{
     float tStart;
-    float tMin;
+    int iterations;
     float coolingRate;
-    int innerLoop;
+    int neighbourhoodSize;
 };

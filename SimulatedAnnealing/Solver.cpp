@@ -9,6 +9,7 @@
 #include "Solver.h"
 
 Solver::~Solver() {
+
 }
 
 void Solver::initiateRandomSolution() {
@@ -45,7 +46,7 @@ void Solver::initiateRandomSolution() {
 
     solution.setMSchedule(schedule);
     evaluate(solution);
-    mSolutions.push_back(solution);
+    mSolution = solution;
 }
 
 bool AreSchedulesEqual(const tSchedule &schedule1, const tSchedule &schedule2) {
@@ -274,114 +275,128 @@ void Solver::swapHomes(Solution &solution) {
 }
 
 void Solver::anneal() {
-    int count_neighbours = 5;
-    int number_of_definitions = 6;
-    int sum_of_neighbours = count_neighbours * number_of_definitions;
+    unsigned int allCounter = 0;
+    auto neighbourhoods = {Home, Rounds, Teams, PRounds, PTeams, PartialTeamsP};
+
 
     initiateRandomSolution();
 
     Solution bestGlobalSolution;
-    bestGlobalSolution.setMSchedule(mSolutions[0].mSchedule);
-    bestGlobalSolution.setMFitness(mSolutions[0].mFitness);
-    bestGlobalSolution.setMHardViolation(mSolutions[0].mHardViolation);
+    bestGlobalSolution.setMSchedule(mSolution.mSchedule);
+    bestGlobalSolution.setMFitness(mSolution.mFitness);
 
     Solution currSolution;
-    currSolution.setMSchedule(mSolutions[0].mSchedule);
-    currSolution.setMFitness(mSolutions[0].mFitness);
-    currSolution.setMHardViolation(mSolutions[0].mHardViolation);
+    currSolution.setMSchedule(mSolution.mSchedule);
+    currSolution.setMFitness(mSolution.mFitness);
 
     Solution bestNew;
-    unsigned int allCounter = 0;
 
 
     auto temperature = mProblem.mParams.tStart;
-    while (temperature > mProblem.mParams.tMin) {
+    while (allCounter < mProblem.mParams.iterations) {
 
-        std::vector<Solution> neighboursVector;
+        //Archiwizuję aktualne rozwiązanie
+        mCurr.push_back(currSolution.mFitness);
+        mTemperatureArchive.push_back(temperature);
 
-        int innerLoopCounter = 0;
-        while (innerLoopCounter < mProblem.mParams.innerLoop) {
-            //Tworzę wektor z wieloma kopiami aktualnego rozwiązania
-            for (int i = 0; i < sum_of_neighbours; i++) {
-                Solution temp;
-                temp.setMSchedule(currSolution.mSchedule);
-                neighboursVector.push_back(temp);
+
+
+        //Tworzę wektor z kopiami aktualnego rozwiązania
+        std::vector<std::pair<NeighbourhoodType, Solution>> neighboursVector;
+        for (const auto &neighbourhood: neighbourhoods) {
+            for (int i = 0; i < mProblem.mParams.neighbourhoodSize; ++i) {
+                Solution sol;
+                sol.setMSchedule(currSolution.mSchedule);
+                neighboursVector.push_back({neighbourhood, sol});
             }
+        }
 
-            //Generuję sąsiedztwa
-            for (int i = 0; i < count_neighbours; i++) {
-                swapTeams(neighboursVector[i]);
-                swapHomes(neighboursVector[i + count_neighbours]);
-                swapRounds(neighboursVector[i + count_neighbours * 2]);
-                partialSwapRounds(neighboursVector[i + count_neighbours * 3]);
-                partialSwapTeams(neighboursVector[i + count_neighbours * 4], false);
-                partialSwapTeams(neighboursVector[i + count_neighbours * 5], true);
+        //Generuję sąsiedztwa i je ewaluuję
+        for (auto &pair: neighboursVector) {
+            switch (pair.first) {
+                case Home:
+                    swapHomes(pair.second);
+                    break;
+                case Rounds:
+                    swapRounds(pair.second);
+                    break;
+                case Teams:
+                    swapTeams(pair.second);
+                    break;
+                case PRounds:
+                    partialSwapRounds(pair.second);
+                    break;
+                case PTeams:
+                    partialSwapTeams(pair.second, false);
+                    break;
+                case PartialTeamsP:
+                    partialSwapTeams(pair.second, true);
+                    break;
+                default:
+
+                    break;
             }
+            evaluate(pair.second);
+        }
 
-            //Ewaluuję każde sąsiedztwo
-            for (int i = 0; i < neighboursVector.size(); i++) {
-                evaluate(neighboursVector[i]);
+        //Sortuję je od największego fitnessu
+        std::sort(neighboursVector.begin(), neighboursVector.end(),
+                  [](std::pair<NeighbourhoodType, Solution> a, std::pair<NeighbourhoodType, Solution> b) {
+                      return a.second.mFitness < b.second.mFitness;
+                  });
+
+        //Wybieram najlepsze z nowych rozwiązań.
+        bestNew.setMSchedule(neighboursVector.front().second.mSchedule);
+        bestNew.setMFitness(neighboursVector.front().second.mFitness);
+
+        //Archiwizuję najlepsze, najgorsze i średnie.
+        float sumFitness = 0.0f;
+        for (const auto &pair: neighboursVector) {
+            sumFitness += pair.second.mFitness;
+        }
+        float averageFitness = sumFitness / neighboursVector.size();
+
+        mBestFromNew.push_back(neighboursVector.front().second.mFitness);
+        mWorstFromNew.push_back(neighboursVector.back().second.mFitness);
+        mAvgFromNew.push_back(averageFitness);
+
+
+        //Jeśli nowe najlepsze, jest lepsze niż aktualne, akceptuję je jako currSolution
+        if (bestNew.mFitness < currSolution.mFitness) {
+            auto a = 1;
+            currSolution.setMSchedule(bestNew.mSchedule);
+            currSolution.setMFitness(bestNew.mFitness);
+
+            //Przy okazji sprawdzam, czy jest najlepszym globalnym rozwiązaniem
+            if (currSolution.mFitness < bestGlobalSolution.mFitness) {
+                bestGlobalSolution.setMSchedule(currSolution.mSchedule);
+                bestGlobalSolution.setMFitness(currSolution.mFitness);
             }
-
-
-            //Wybieram najlepsze z nowych rozwiązań.
-            int neighID = 0;
-            int bestID = 0;
-            bestNew.setMSchedule(neighboursVector[neighID].mSchedule);
-            bestNew.setMFitness(neighboursVector[neighID].mFitness);
-            bestNew.setMHardViolation(neighboursVector[neighID].mHardViolation);
-
-
-            for (int i = 0; i < neighboursVector.size(); i++) {
-                if (neighboursVector[i].mFitness < bestNew.mFitness) {
-                    bestNew.setMSchedule(neighboursVector[i].mSchedule);
-                    bestNew.setMFitness(neighboursVector[i].mFitness);
-                    bestNew.setMHardViolation(neighboursVector[i].mHardViolation);
-                    bestID = i;
-                }
-            }
-
-            std::cout<<bestNew.mFitness<<std::endl;
-
-            //Jeśli nowe najlepsze, jest lepsze niż aktualne, akceptuję je jako currSolution
-            if (bestNew.mFitness < currSolution.mFitness) {
+        }
+            //w przeciwnym wypadku, akceptuję je jako nowe z pewną dozą prawdopodobieństwa
+        else {
+            double randomNumber = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+            double valueToChangeSolution = exp(
+                    -((bestNew.mFitness - currSolution.mFitness) / temperature));
+            if (randomNumber < valueToChangeSolution) {
                 currSolution.setMSchedule(bestNew.mSchedule);
                 currSolution.setMFitness(bestNew.mFitness);
-                currSolution.setMHardViolation(bestNew.mHardViolation);
-
-                //Przy okazji sprawdzam, czy jest najlepszym globalnym rozwiązaniem
-                if (currSolution.mFitness < bestGlobalSolution.mFitness) {
-                    bestGlobalSolution.setMSchedule(currSolution.mSchedule);
-                    bestGlobalSolution.setMFitness(currSolution.mFitness);
-                    bestGlobalSolution.setMHardViolation(currSolution.mHardViolation);
-                }
             }
-                //w przeciwnym wypadku, akceptuję je jako nowe z pewną dozą prawdopodobieństwa
-            else {
-                double randomNumber = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
-                double valueToChangeSolution = exp(
-                        -((bestNew.mFitness - currSolution.mFitness) / temperature));
-                if (randomNumber < valueToChangeSolution) {
-                    currSolution.setMSchedule(bestNew.mSchedule);
-                    currSolution.setMFitness(bestNew.mFitness);
-                    currSolution.setMHardViolation(bestNew.mHardViolation);
-                }
-            }
-            allCounter++;
-            innerLoopCounter++;
-
-            mCurr.push_back(currSolution.mFitness);
-            mBest.push_back(bestGlobalSolution.mFitness);
-
-            //Zwalniam pamięć
-            neighboursVector.clear();
-
         }
+        allCounter++;
+
+        //Archiwizuję globalnie najlepsze rozwiązanie.
+        mBest.push_back(bestGlobalSolution.mFitness);
+
+        //Zwalniam pamięć
+        neighboursVector.clear();
+
+        //Zmniejszam temperaturę
         temperature = temperature * mProblem.mParams.coolingRate;
     }
-    mSolutions[0].setMSchedule(bestGlobalSolution.mSchedule);
-    mSolutions[0].setMFitness(bestGlobalSolution.mFitness);
-    mSolutions[0].setMHardViolation(bestGlobalSolution.mHardViolation);
+    //Jako Solution obiektu solver na koniec ustawiam najlepsze znalezione
+    mSolution.setMSchedule(bestGlobalSolution.mSchedule);
+    mSolution.setMFitness(bestGlobalSolution.mFitness);
 }
 
 void Solver::evaluate(Solution &solution) {
@@ -394,3 +409,39 @@ void Solver::initiateGlobalRNG(int seed) {
     mSeed = seed;
     gen.seed(mSeed);
 }
+
+void Solver::clearArchive() {
+    mBest.clear();
+    mTemperatureArchive.clear();
+    mCurr.clear();
+    mBestFromNew.clear();
+    mAvgFromNew.clear();
+    mWorstFromNew.clear();
+}
+
+int Solver::countSoftViolations() {
+    auto numberOfViolations = 0;
+    for (auto constraint: mProblem.mConstraints) {
+        auto violationCondition = constraint->isViolated(mSolution);
+        if (violationCondition){
+            if (!constraint->isHard()){
+                numberOfViolations++;
+            }
+        }
+    }
+    return numberOfViolations;
+}
+
+int Solver::countHardViolations() {
+    auto numberOfViolations = 0;
+    for (auto constraint: mProblem.mConstraints) {
+        auto violationCondition = constraint->isViolated(mSolution);
+        if (violationCondition){
+            if (constraint->isHard()){
+                numberOfViolations++;
+            }
+        }
+    }
+    return numberOfViolations;
+}
+

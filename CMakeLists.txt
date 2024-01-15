@@ -28,16 +28,16 @@ add_executable(Implementacja_AOIN_P main.cpp
         Constraints/ConstraintType.h
         Solution/Meeting.h
         Constraints/Mode.h
-        Problem.h
-        Solver.cpp
-        Solver.h
-        Problem.cpp
+        Problem/Problem.h
+        SimulatedAnnealing/Solver.cpp
+        SimulatedAnnealing/Solver.h
+        Problem/Problem.cpp
         Constraints/PhasedConstraint.cpp
         Constraints/PhasedConstraint.h
-        Solver.cpp
+        SimulatedAnnealing/Solver.cpp
         Constraints/BasicConstraint.cpp
         Constraints/BasicConstraint.h
-        paramsSA.h
+        SimulatedAnnealing/paramsSA.h
         FileParser/FileParser.cpp
         FileParser/FileParser.h
         FileParser/pugiXML/pugixml.hpp
