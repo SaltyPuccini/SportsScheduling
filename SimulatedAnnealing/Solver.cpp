@@ -467,7 +467,7 @@ void Solver::anneal() {
         globalNeighbourhoodPerformance[bestNeighbourhoodType]++;
 
         //Modyfikuję rozmiary sąsiedztw, jeśli na to czas
-        if (allCounter != 0 && allCounter % (mProblem.mParams.iterations/100) == 0) {
+        if (allCounter != 0 && mProblem.mParams.iterations>=100 && allCounter % (mProblem.mParams.iterations/100) == 0) {
             adjustNeighbourhoodSizes(neighbourhoodPerformance, neighbourhoodSize);
         }
 
