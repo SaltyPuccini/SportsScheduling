@@ -21,8 +21,8 @@ int main(int argc, char *argv[]) {
     size_t dotPositionXML = xmlFile.rfind('.');
     std::string nameOnlyXML = xmlFile.substr(0, dotPositionXML);
 
-    size_t dotPositionConfig = xmlFile.rfind('.');
-    std::string nameOnlyConfig = xmlFile.substr(0, dotPositionConfig);
+    size_t dotPositionConfig = configFile.rfind('.');
+    std::string nameOnlyConfig = configFile.substr(0, dotPositionConfig);
 
     Solver solver;
     FileParser parser;
