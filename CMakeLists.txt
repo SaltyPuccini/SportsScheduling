@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.26)
 project(Implementacja_AOIN_P)
 
 set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_EXE_LINKER_FLAGS "-static")
 
 add_executable(Implementacja_AOIN_P main.cpp
         Constraints/IConstraint.h
