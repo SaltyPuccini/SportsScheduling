@@ -274,10 +274,126 @@ void Solver::swapHomes(Solution &solution) {
     }
 }
 
+void adjustNeighbourhoodSizes(std::map<NeighbourhoodType, int> &neighbourhoodPerformance,
+                              std::map<NeighbourhoodType, int> &neighbourhoodSize) {
+    int totalBestCount = 0;
+    for (const auto &entry: neighbourhoodPerformance) {
+        totalBestCount += entry.second;
+    }
+
+    int totalAvailableNeighbors = 0;
+    for (const auto &entry: neighbourhoodSize) {
+        totalAvailableNeighbors += entry.second;
+    }
+
+
+    // Proporcjonalne sąsiedztwo
+    for (auto &entry: neighbourhoodSize) {
+        double usagePercentage = static_cast<double>(neighbourhoodPerformance[entry.first]) / totalBestCount;
+        entry.second = static_cast<int>(usagePercentage * totalAvailableNeighbors);
+
+        // W każdym sąsiedztwie musi być co najmniej 1 sąsiad
+        if (entry.second == 0 && totalAvailableNeighbors > 0) {
+            entry.second = 1;
+        }
+    }
+
+
+
+    // Jeśli po podziale zostało wolne miejsce na sąsiedztwo, oddajemy je temu najlepszemu
+    int allocatedNeighbors = 0;
+    for (const auto &entry: neighbourhoodSize) {
+        allocatedNeighbors += entry.second;
+    }
+    int remainingNeighbors = totalAvailableNeighbors - allocatedNeighbors;
+
+    auto bestIter = std::max_element(neighbourhoodPerformance.begin(), neighbourhoodPerformance.end(),
+                                     [](const auto &a, const auto &b) { return a.second < b.second; });
+    if (bestIter != neighbourhoodPerformance.end()) {
+        neighbourhoodSize[bestIter->first] += remainingNeighbors;
+    }
+
+    // Reset zliczania performance'u
+    for (auto &entry: neighbourhoodPerformance) {
+        entry.second = 0;
+    }
+}
+
+
+void reverseNeighbourhoodSizes(std::map<NeighbourhoodType, int> &neighbourhoodSize,
+                               std::map<NeighbourhoodType, int> &neighbourhoodPerformance,
+                               std::map<NeighbourhoodType, int> &globalNeighbourhoodPerformance) {
+
+    double totalInversePerformance = 0.0;
+
+    // Obliczamy sumę odwrotności wydajności
+    for (const auto &entry : globalNeighbourhoodPerformance) {
+        if (entry.second != 0) {
+            totalInversePerformance += 1.0 / entry.second;
+        }
+    }
+
+    int totalAvailableNeighbors = 0;
+    for (const auto &entry: neighbourhoodSize) {
+        totalAvailableNeighbors += entry.second;
+    }
+
+    // Odwrotnie proporcjonalne sąsiedztwo
+    for (auto &entry : neighbourhoodSize) {
+        double inversePerformance = (globalNeighbourhoodPerformance[entry.first] != 0)
+                                    ? 1.0 / globalNeighbourhoodPerformance[entry.first]
+                                    : 0.0;
+        double usagePercentage = (totalInversePerformance != 0)
+                                 ? inversePerformance / totalInversePerformance
+                                 : 0.0;
+        entry.second = static_cast<int>(usagePercentage * totalAvailableNeighbors);
+
+        // Zapewnienie co najmniej jednego sąsiada
+        if (entry.second == 0 && totalAvailableNeighbors > 0) {
+            entry.second = 1;
+        }
+    }
+
+    // Jeśli po podziale zostało wolne miejsce na sąsiedztwo, oddajemy je temu najlepszemu
+    int allocatedNeighbors = 0;
+    for (const auto &entry: neighbourhoodSize) {
+        allocatedNeighbors += entry.second;
+    }
+    int remainingNeighbors = totalAvailableNeighbors - allocatedNeighbors;
+
+    auto worstIter = std::min_element(globalNeighbourhoodPerformance.begin(), globalNeighbourhoodPerformance.end(),
+                                     [](const auto &a, const auto &b) { return a.second < b.second; });
+    if (worstIter != globalNeighbourhoodPerformance.end()) {
+        neighbourhoodSize[worstIter->first] += remainingNeighbors;
+    }
+
+
+
+    // Reset zliczania performance'u
+    for (auto &entry: neighbourhoodPerformance) {
+        entry.second = 0;
+    }
+
+    for (auto &entry: globalNeighbourhoodPerformance) {
+        entry.second = 0;
+    }
+}
+
+
 void Solver::anneal() {
     unsigned int allCounter = 0;
+    unsigned int lastGlobalImprovement = 0;
     auto neighbourhoods = {Home, Rounds, Teams, PRounds, PTeams, PartialTeamsP};
 
+    std::map<NeighbourhoodType, int> neighbourhoodPerformance;
+    std::map<NeighbourhoodType, int> globalNeighbourhoodPerformance;
+    std::map<NeighbourhoodType, int> neighbourhoodSize;
+
+    for (const auto &neighbourhood: neighbourhoods) {
+        neighbourhoodSize[neighbourhood] = mProblem.mParams.neighbourhoodSize;
+        neighbourhoodPerformance[neighbourhood] = 0;
+        globalNeighbourhoodPerformance[neighbourhood] = 0;
+    }
 
     initiateRandomSolution();
 
@@ -304,7 +420,7 @@ void Solver::anneal() {
         //Tworzę wektor z kopiami aktualnego rozwiązania
         std::vector<std::pair<NeighbourhoodType, Solution>> neighboursVector;
         for (const auto &neighbourhood: neighbourhoods) {
-            for (int i = 0; i < mProblem.mParams.neighbourhoodSize; ++i) {
+            for (int i = 0; i < neighbourhoodSize[neighbourhood]; ++i) {
                 Solution sol;
                 sol.setMSchedule(currSolution.mSchedule);
                 neighboursVector.push_back({neighbourhood, sol});
@@ -345,6 +461,16 @@ void Solver::anneal() {
                       return a.second.mFitness < b.second.mFitness;
                   });
 
+        //Zapisuję performance poszczególnych sąsiedztw
+        NeighbourhoodType bestNeighbourhoodType = neighboursVector.front().first;
+        neighbourhoodPerformance[bestNeighbourhoodType]++;
+        globalNeighbourhoodPerformance[bestNeighbourhoodType]++;
+
+        //Modyfikuję rozmiary sąsiedztw, jeśli na to czas
+        if (allCounter != 0 && allCounter % (mProblem.mParams.iterations/100) == 0) {
+            adjustNeighbourhoodSizes(neighbourhoodPerformance, neighbourhoodSize);
+        }
+
         //Wybieram najlepsze z nowych rozwiązań.
         bestNew.setMSchedule(neighboursVector.front().second.mSchedule);
         bestNew.setMFitness(neighboursVector.front().second.mFitness);
@@ -371,6 +497,7 @@ void Solver::anneal() {
             if (currSolution.mFitness < bestGlobalSolution.mFitness) {
                 bestGlobalSolution.setMSchedule(currSolution.mSchedule);
                 bestGlobalSolution.setMFitness(currSolution.mFitness);
+                lastGlobalImprovement = allCounter;
             }
         }
             //w przeciwnym wypadku, akceptuję je jako nowe z pewną dozą prawdopodobieństwa
@@ -383,6 +510,12 @@ void Solver::anneal() {
                 currSolution.setMFitness(bestNew.mFitness);
             }
         }
+
+        if (allCounter - lastGlobalImprovement > mProblem.mParams.iterations/10) {
+            reverseNeighbourhoodSizes(neighbourhoodSize, neighbourhoodPerformance, globalNeighbourhoodPerformance);
+            lastGlobalImprovement = allCounter; // Reset the counter after reversal
+        }
+
         allCounter++;
 
         //Archiwizuję globalnie najlepsze rozwiązanie.
@@ -398,6 +531,7 @@ void Solver::anneal() {
     mSolution.setMSchedule(bestGlobalSolution.mSchedule);
     mSolution.setMFitness(bestGlobalSolution.mFitness);
 }
+
 
 void Solver::evaluate(Solution &solution) {
     for (auto constraint: mProblem.mConstraints) {
@@ -423,8 +557,8 @@ int Solver::countSoftViolations() {
     auto numberOfViolations = 0;
     for (auto constraint: mProblem.mConstraints) {
         auto violationCondition = constraint->isViolated(mSolution);
-        if (violationCondition){
-            if (!constraint->isHard()){
+        if (violationCondition) {
+            if (!constraint->isHard()) {
                 numberOfViolations++;
             }
         }
@@ -436,8 +570,8 @@ int Solver::countHardViolations() {
     auto numberOfViolations = 0;
     for (auto constraint: mProblem.mConstraints) {
         auto violationCondition = constraint->isViolated(mSolution);
-        if (violationCondition){
-            if (constraint->isHard()){
+        if (violationCondition) {
+            if (constraint->isHard()) {
                 numberOfViolations++;
             }
         }
