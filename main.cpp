@@ -36,7 +36,8 @@ int main(int argc, char *argv[]) {
         auto end = std::chrono::high_resolution_clock::now();
         std::chrono::duration<double> elapsed = end - start;
 
-        parser.saveResults(xmlFile, configFile, i, solver);
+        parser.saveResultsCSV(xmlFile, configFile, i, solver);
+
         std::cout << solver.mSolution.mFitness << std::endl;
         std::cout << "Is basic violated? " << solver.mProblem.mConstraints[0]->isViolated(solver.mSolution)
                   << std::endl;
@@ -48,6 +49,28 @@ int main(int argc, char *argv[]) {
         std::cout << "Hard violations: " << solver.countHardViolations()<< std::endl;
         std::cout <<"Elapsed: "<<elapsed<< "[s]."<<std::endl;
         std::cout << std::endl;
+
+        std::string resultsFileTXT = "metaresults" + nameOnlyXML + "_" + nameOnlyConfig + "_" + std::to_string(i) + ".txt";
+
+        std::ofstream file(resultsFileTXT);  // Otwieranie pliku do zapisu
+
+        if (file.is_open()) {
+            file << solver.mSolution.mFitness << std::endl;
+            file << "Is basic violated? " << solver.mProblem.mConstraints[0]->isViolated(solver.mSolution) << std::endl;
+            if (solver.mProblem.mIsPhased) {
+                file << "Is phased violated? " << solver.mProblem.mConstraints[1]->isViolated(solver.mSolution) << std::endl;
+            }
+            file << "Soft violations: " << solver.countSoftViolations() << std::endl;
+            file << "Hard violations: " << solver.countHardViolations() << std::endl;
+            file << "Elapsed: " << elapsed << " [s]." << std::endl;
+            file << std::endl;
+
+            file.close(); // Zamykanie pliku
+        } else {
+            std::cerr << "Nie można otworzyć pliku do zapisu." << std::endl;
+        }
+
+
         solver.clearArchive();
     }
 

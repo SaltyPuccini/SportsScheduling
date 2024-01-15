@@ -516,7 +516,7 @@ void FileParser::parse(const std::string &filename, const std::string &SAFile, P
     }
 }
 
-void FileParser::saveResults(const std::string &nameOnlyXML, const std::string &nameOnlyConfig, int runNumber,
+void FileParser::saveResultsCSV(const std::string &nameOnlyXML, const std::string &nameOnlyConfig, int runNumber,
                              const Solver &solver) {
     std::string resultsFile = nameOnlyXML + "_" + nameOnlyConfig + "_" + std::to_string(runNumber) + ".csv";
     std::ofstream file(resultsFile);
@@ -537,5 +537,3 @@ void FileParser::saveResults(const std::string &nameOnlyXML, const std::string &
     }
     file.close();
 }
-
-

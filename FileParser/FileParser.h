@@ -41,5 +41,7 @@ public:
     bool parseSAConfig(const std::string &filename, paramsSA &params, std::vector<int> &intVector);
 
     void
-    saveResults(const std::string &nameOnlyXML, const std::string &nameOnlyConfig, int runNumber, const Solver &solver);
+    saveResultsCSV(const std::string &nameOnlyXML, const std::string &nameOnlyConfig, int runNumber,
+                   const Solver &solver);
+
 };
