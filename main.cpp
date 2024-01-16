@@ -36,33 +36,33 @@ int main(int argc, char *argv[]) {
         auto end = std::chrono::high_resolution_clock::now();
         std::chrono::duration<double> elapsed = end - start;
 
-        parser.saveResultsCSV(xmlFile, configFile, i, solver);
+        parser.saveResultsCSV("basic_" + xmlFile, configFile, i, solver);
 
 
         std::string resultsFileTXT =
-                "metaresults" + nameOnlyXML + "_" + nameOnlyConfig + "_" + std::to_string(i) + ".txt";
+                "basic_metaresults" + nameOnlyXML + "_" + nameOnlyConfig + "_" + std::to_string(i) + ".txt";
         std::ofstream file(resultsFileTXT);  // Otwieranie pliku do zapisu
         if (file.is_open()) {
             std::cout << solver.mSolution.mFitness << std::endl;
             file << solver.mSolution.mFitness << std::endl;
-            auto a = solver.mProblem.mConstraints[0]->isViolated(solver.mSolution);
+            auto basicViolations = solver.mProblem.mConstraints[0]->isViolated(solver.mSolution);
 
-            std::cout << "Is basic violated? " << a << std::endl;
-            file << "Is basic violated? " << a << std::endl;
+            std::cout << "Is basic violated? " << basicViolations << std::endl;
+            file << "Is basic violated? " << basicViolations << std::endl;
 
             if (solver.mProblem.mIsPhased) {
-                auto b = solver.mProblem.mConstraints[1]->isViolated(solver.mSolution);
-                std::cout << "Is phased violated? " << b << std::endl;
-                file << "Is phased violated? " << b << std::endl;
+                auto phasedViolations = solver.mProblem.mConstraints[1]->isViolated(solver.mSolution);
+                std::cout << "Is phased violated? " << phasedViolations << std::endl;
+                file << "Is phased violated? " << phasedViolations << std::endl;
             }
-            auto c = solver.countSoftViolations();
-            std::cout << "Soft violations: " << c << std::endl;
-            file << "Soft violations: " << c << std::endl;
+            auto softViolations = solver.countSoftViolations();
+            std::cout << "Soft violations: " << softViolations << std::endl;
+            file << "Soft violations: " << softViolations << std::endl;
 
-            auto d = solver.countHardViolations();
+            auto hardViolations = solver.countHardViolations();
 
-            std::cout << "Hard violations: " << d << std::endl;
-            file << "Hard violations: " << d << std::endl;
+            std::cout << "Hard violations: " << hardViolations << std::endl;
+            file << "Hard violations: " << hardViolations << std::endl;
 
             std::cout << "Elapsed: " << elapsed << "[s]." << std::endl;
             file << "Elapsed: " << elapsed << "[s]." << std::endl;

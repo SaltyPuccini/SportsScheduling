@@ -320,14 +320,14 @@ void adjustNeighbourhoodSizes(std::map<NeighbourhoodType, int> &neighbourhoodPer
 }
 
 
-void reverseNeighbourhoodSizes(std::map<NeighbourhoodType, int> &neighbourhoodSize,
+void inverseNeighbourhoodSizes(std::map<NeighbourhoodType, int> &neighbourhoodSize,
                                std::map<NeighbourhoodType, int> &neighbourhoodPerformance,
                                std::map<NeighbourhoodType, int> &globalNeighbourhoodPerformance) {
 
     double totalInversePerformance = 0.0;
 
     // Obliczamy sumę odwrotności wydajności
-    for (const auto &entry : globalNeighbourhoodPerformance) {
+    for (const auto &entry: globalNeighbourhoodPerformance) {
         if (entry.second != 0) {
             totalInversePerformance += 1.0 / entry.second;
         }
@@ -339,7 +339,7 @@ void reverseNeighbourhoodSizes(std::map<NeighbourhoodType, int> &neighbourhoodSi
     }
 
     // Odwrotnie proporcjonalne sąsiedztwo
-    for (auto &entry : neighbourhoodSize) {
+    for (auto &entry: neighbourhoodSize) {
         double inversePerformance = (globalNeighbourhoodPerformance[entry.first] != 0)
                                     ? 1.0 / globalNeighbourhoodPerformance[entry.first]
                                     : 0.0;
@@ -362,7 +362,7 @@ void reverseNeighbourhoodSizes(std::map<NeighbourhoodType, int> &neighbourhoodSi
     int remainingNeighbors = totalAvailableNeighbors - allocatedNeighbors;
 
     auto worstIter = std::min_element(globalNeighbourhoodPerformance.begin(), globalNeighbourhoodPerformance.end(),
-                                     [](const auto &a, const auto &b) { return a.second < b.second; });
+                                      [](const auto &a, const auto &b) { return a.second < b.second; });
     if (worstIter != globalNeighbourhoodPerformance.end()) {
         neighbourhoodSize[worstIter->first] += remainingNeighbors;
     }
@@ -467,7 +467,8 @@ void Solver::anneal() {
         globalNeighbourhoodPerformance[bestNeighbourhoodType]++;
 
         //Modyfikuję rozmiary sąsiedztw, jeśli na to czas
-        if (allCounter != 0 && mProblem.mParams.iterations>=100 && allCounter % (mProblem.mParams.iterations/100) == 0) {
+        if (mProblem.mParams.isAdaptive && allCounter != 0 && mProblem.mParams.iterations >= 100 &&
+            allCounter % (mProblem.mParams.iterations / 100) == 0) {
             adjustNeighbourhoodSizes(neighbourhoodPerformance, neighbourhoodSize);
         }
 
@@ -510,10 +511,10 @@ void Solver::anneal() {
                 currSolution.setMFitness(bestNew.mFitness);
             }
         }
-
-        if (allCounter - lastGlobalImprovement > mProblem.mParams.iterations/10) {
-            reverseNeighbourhoodSizes(neighbourhoodSize, neighbourhoodPerformance, globalNeighbourhoodPerformance);
-            lastGlobalImprovement = allCounter; // Reset the counter after reversal
+        //Jak długo nie było znalezienia nowego rozwiązania, robię inverse na wielkościach sąsiedztw
+        if (mProblem.mParams.isAdaptive && ((allCounter - lastGlobalImprovement) > (mProblem.mParams.iterations / 10))) {
+            inverseNeighbourhoodSizes(neighbourhoodSize, neighbourhoodPerformance, globalNeighbourhoodPerformance);
+            lastGlobalImprovement = allCounter;
         }
 
         allCounter++;
