@@ -151,7 +151,6 @@ void Solver::partialSwapRounds(Solution &solution) {
             for (size_t i = 0; i < meetingsToSwapRi.size(); ++i) {
                 std::swap(*meetingsToSwapRi[i], *meetingsToSwapRj[i]);
             }
-            auto temp = AreSchedulesEqual(s.mSchedule, solution.mSchedule);
         }
     }
 }
@@ -299,7 +298,6 @@ void adjustNeighbourhoodSizes(std::map<NeighbourhoodType, int> &neighbourhoodPer
     }
 
 
-
     // Jeśli po podziale zostało wolne miejsce na sąsiedztwo, oddajemy je temu najlepszemu
     int allocatedNeighbors = 0;
     for (const auto &entry: neighbourhoodSize) {
@@ -320,64 +318,29 @@ void adjustNeighbourhoodSizes(std::map<NeighbourhoodType, int> &neighbourhoodPer
 }
 
 
-void inverseNeighbourhoodSizes(std::map<NeighbourhoodType, int> &neighbourhoodSize,
-                               std::map<NeighbourhoodType, int> &neighbourhoodPerformance,
-                               std::map<NeighbourhoodType, int> &globalNeighbourhoodPerformance) {
 
-    double totalInversePerformance = 0.0;
 
-    // Obliczamy sumę odwrotności wydajności
-    for (const auto &entry: globalNeighbourhoodPerformance) {
-        if (entry.second != 0) {
-            totalInversePerformance += 1.0 / entry.second;
-        }
+std::map<NeighbourhoodType, int> getAverages(const std::vector<std::pair<NeighbourhoodType, int>>& pairs) {
+    std::map<NeighbourhoodType, int> sum;
+    std::map<NeighbourhoodType, int> count;
+
+    for (const auto& pair : pairs) {
+        sum[pair.first] += pair.second;
+        count[pair.first]++;
     }
 
-    int totalAvailableNeighbors = 0;
-    for (const auto &entry: neighbourhoodSize) {
-        totalAvailableNeighbors += entry.second;
+    std::map<Neighbour, int> averages;
+    for (auto& s : sum) {
+        averages[s.first] = s.second / count[s.first];
     }
 
-    // Odwrotnie proporcjonalne sąsiedztwo
-    for (auto &entry: neighbourhoodSize) {
-        double inversePerformance = (globalNeighbourhoodPerformance[entry.first] != 0)
-                                    ? 1.0 / globalNeighbourhoodPerformance[entry.first]
-                                    : 0.0;
-        double usagePercentage = (totalInversePerformance != 0)
-                                 ? inversePerformance / totalInversePerformance
-                                 : 0.0;
-        entry.second = static_cast<int>(usagePercentage * totalAvailableNeighbors);
-
-        // Zapewnienie co najmniej jednego sąsiada
-        if (entry.second == 0 && totalAvailableNeighbors > 0) {
-            entry.second = 1;
-        }
-    }
-
-    // Jeśli po podziale zostało wolne miejsce na sąsiedztwo, oddajemy je temu najlepszemu
-    int allocatedNeighbors = 0;
-    for (const auto &entry: neighbourhoodSize) {
-        allocatedNeighbors += entry.second;
-    }
-    int remainingNeighbors = totalAvailableNeighbors - allocatedNeighbors;
-
-    auto worstIter = std::min_element(globalNeighbourhoodPerformance.begin(), globalNeighbourhoodPerformance.end(),
-                                      [](const auto &a, const auto &b) { return a.second < b.second; });
-    if (worstIter != globalNeighbourhoodPerformance.end()) {
-        neighbourhoodSize[worstIter->first] += remainingNeighbors;
-    }
-
-
-
-    // Reset zliczania performance'u
-    for (auto &entry: neighbourhoodPerformance) {
-        entry.second = 0;
-    }
-
-    for (auto &entry: globalNeighbourhoodPerformance) {
-        entry.second = 0;
-    }
+    return averages;
 }
+
+
+
+
+
 
 
 void Solver::anneal() {
@@ -386,13 +349,11 @@ void Solver::anneal() {
     auto neighbourhoods = {Home, Rounds, Teams, PRounds, PTeams, PartialTeamsP};
 
     std::map<NeighbourhoodType, int> neighbourhoodPerformance;
-    std::map<NeighbourhoodType, int> globalNeighbourhoodPerformance;
     std::map<NeighbourhoodType, int> neighbourhoodSize;
 
     for (const auto &neighbourhood: neighbourhoods) {
         neighbourhoodSize[neighbourhood] = mProblem.mParams.neighbourhoodSize;
         neighbourhoodPerformance[neighbourhood] = 0;
-        globalNeighbourhoodPerformance[neighbourhood] = 0;
     }
 
     initiateRandomSolution();
@@ -461,16 +422,24 @@ void Solver::anneal() {
                       return a.second.mFitness < b.second.mFitness;
                   });
 
-        //Zapisuję performance poszczególnych sąsiedztw
-        NeighbourhoodType bestNeighbourhoodType = neighboursVector.front().first;
-        neighbourhoodPerformance[bestNeighbourhoodType]++;
-        globalNeighbourhoodPerformance[bestNeighbourhoodType]++;
+        //Przyznaję punkty rankignowe - im lepszy tym więcej punktów
+        std::vector<int> pointsVector = {
+                100, 80, 60, 50, 45, 40, 36, 32, 29, 26,
+                24, 22, 20, 18, 16, 15, 14, 13, 12, 11,
+                10, 9, 8, 7, 6, 5, 4, 3, 2, 1
+        };
 
-        //Modyfikuję rozmiary sąsiedztw, jeśli na to czas
-        if (mProblem.mParams.isAdaptive && allCounter != 0 && mProblem.mParams.iterations >= 100 &&
-            allCounter % (mProblem.mParams.iterations / 100) == 0) {
-            adjustNeighbourhoodSizes(neighbourhoodPerformance, neighbourhoodSize);
+        for (auto neighbourhood: neighboursVector) {
+            neighbourhoodPerformance[neighbourhood.first] += neighbourhood.second.mFitness;
         }
+
+        for (auto n : neighbourhoods){
+            neighbourhoodPerformance[n];
+        }
+
+
+        adjustNeighbourhoodSizes(neighbourhoodPerformance, neighbourhoodSize);
+
 
         //Wybieram najlepsze z nowych rozwiązań.
         bestNew.setMSchedule(neighboursVector.front().second.mSchedule);
@@ -490,7 +459,6 @@ void Solver::anneal() {
 
         //Jeśli nowe najlepsze, jest lepsze niż aktualne, akceptuję je jako currSolution
         if (bestNew.mFitness < currSolution.mFitness) {
-            auto a = 1;
             currSolution.setMSchedule(bestNew.mSchedule);
             currSolution.setMFitness(bestNew.mFitness);
 
@@ -510,11 +478,6 @@ void Solver::anneal() {
                 currSolution.setMSchedule(bestNew.mSchedule);
                 currSolution.setMFitness(bestNew.mFitness);
             }
-        }
-        //Jak długo nie było znalezienia nowego rozwiązania, robię inverse na wielkościach sąsiedztw
-        if (mProblem.mParams.isAdaptive && ((allCounter - lastGlobalImprovement) > (mProblem.mParams.iterations / 10))) {
-            inverseNeighbourhoodSizes(neighbourhoodSize, neighbourhoodPerformance, globalNeighbourhoodPerformance);
-            lastGlobalImprovement = allCounter;
         }
 
         allCounter++;

@@ -64,8 +64,8 @@ int main(int argc, char *argv[]) {
             std::cout << "Hard violations: " << hardViolations << std::endl;
             file << "Hard violations: " << hardViolations << std::endl;
 
-            std::cout << "Elapsed: " << elapsed << "[s]." << std::endl;
-            file << "Elapsed: " << elapsed << "[s]." << std::endl;
+            std::cout << "Elapsed: " << elapsed.count() << "[s]." << std::endl;
+            file << "Elapsed: " << elapsed.count() << "[s]." << std::endl;
 
             std::cout << std::endl;
             file.close();
