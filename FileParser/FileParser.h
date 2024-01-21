@@ -3,6 +3,7 @@
 #include <sstream>
 #include <iostream>
 #include <memory>
+#include <map>
 #include "pugiXML/pugixml.hpp"
 #include "../Constraints/GA/ConstraintGA1.h"
 #include "../Constraints/BR/ConstraintBR1.h"
@@ -31,6 +32,7 @@ class FileParser {
 
 public:
     bool mIsPhased;
+    std::map<NeighbourhoodType,std::string> neighbourhoods;
 
     std::vector<int> parseConfig(const std::string &weightFile);
 

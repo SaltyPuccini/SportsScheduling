@@ -518,12 +518,30 @@ void FileParser::parse(const std::string &filename, const std::string &SAFile, P
     }
 }
 
+std::string parseEnumNeighbourType(NeighbourhoodType n) {
+    switch (n) {
+        case Home:
+            return "Home";
+        case Rounds:
+            return "Rounds";
+        case Teams:
+            return "Teams";
+        case PRounds:
+            return "PRounds";
+        case PTeams:
+            return "PTeams";
+        case PartialTeamsP:
+            return "PartialTeamsP";
+    }
+}
+
+
 void FileParser::saveResultsCSV(const std::string &nameOnlyXML, const std::string &nameOnlyConfig, int runNumber,
                                 const Solver &solver) {
     std::string resultsFile = nameOnlyXML + "_" + nameOnlyConfig + "_" + std::to_string(runNumber) + ".csv";
     std::ofstream file(resultsFile);
 
-    file << "overallLoop,temperature,curr,bestFromNew,avgFromNew,worstFromNew,overallBest\n";
+    file << "overallLoop,temperature,curr,bestFromNew,avgFromNew,worstFromNew,bestNewNeighbourhood,overallBest\n";
 
     // Check if all vectors have the same size
     size_t n = solver.mBest.size();
@@ -535,6 +553,7 @@ void FileParser::saveResultsCSV(const std::string &nameOnlyXML, const std::strin
              << solver.mBestFromNew[line] << ","
              << solver.mAvgFromNew[line] << ","
              << solver.mWorstFromNew[line] << ","
+             << parseEnumNeighbourType(solver.mBestNewNeighbourhood[line]) << ","
              << solver.mBest[line] << "\n";
     }
     file.close();

@@ -37,7 +37,7 @@ int main(int argc, char *argv[]) {
         std::chrono::duration<double> elapsed = end - start;
 
         std::string resultsFileTXT =
-                "basic_metaresults" + nameOnlyXML + "_" + nameOnlyConfig + "_" + std::to_string(i) + ".txt";
+                "random_metaresults" + nameOnlyXML + "_" + nameOnlyConfig + "_" + std::to_string(i) + ".txt";
 
         if (solver.mProblem.mParams.isAdaptive){
             parser.saveResultsCSV(xmlFile, configFile, i, solver);
@@ -45,7 +45,7 @@ int main(int argc, char *argv[]) {
                     "metaresults" + nameOnlyXML + "_" + nameOnlyConfig + "_" + std::to_string(i) + ".txt";
 
         }else{
-            parser.saveResultsCSV("basic_" + xmlFile, configFile, i, solver);
+            parser.saveResultsCSV("random_" + xmlFile, configFile, i, solver);
         }
 
 
