@@ -274,21 +274,6 @@ void Solver::swapHomes(Solution &solution) {
     }
 }
 
-void evaluateNeighbourhoodPerformance(
-        const std::vector<std::pair<NeighbourhoodType, Solution>> &neighboursVector,
-        std::vector<NeighbourhoodPerformance> &neighbourhoodPerformance,
-        std::vector<NeighbourhoodType> neighbourhoods
-) {
-
-    // Mapa do przechowywania sumarycznej poprawy dla każdego typu sąsiedztwa
-    std::map<NeighbourhoodType, float> performanceMap;
-
-    // Inicjalizacja mapy
-    for (const auto &neighbourhood: neighbourhoods) {
-        performanceMap[neighbourhood] = 0;
-    }
-}
-
 
 void Solver::anneal() {
     unsigned int allCounter = 0;
@@ -411,8 +396,8 @@ void Solver::anneal() {
                 neighbourhoodSize[sortedBestPositions[0].first] +=
                         neighbourhoodSize.size() * mProblem.mParams.neighbourhoodSize - totalSize;
             }
-        } else{
-            for (auto pair : neighbourhoodSize){
+        } else {
+            for (auto pair: neighbourhoodSize) {
                 std::uniform_int_distribution<> dist(0, size);
                 auto generatedNumber = dist(gen);
                 neighbourhoodSize[pair.first] += generatedNumber;
@@ -437,6 +422,7 @@ void Solver::anneal() {
         mBestFromNew.push_back(neighboursVector.front().second.mFitness);
         mWorstFromNew.push_back(neighboursVector.back().second.mFitness);
         mAvgFromNew.push_back(averageFitness);
+        mBestNewNeighbourhood.push_back(neighboursVector.front().first);
 
 
         //Jeśli nowe najlepsze, jest lepsze niż aktualne, akceptuję je jako currSolution

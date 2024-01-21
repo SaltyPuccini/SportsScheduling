@@ -7,11 +7,6 @@ enum NeighbourhoodType {
     Home, Rounds, Teams, PRounds, PTeams, PartialTeamsP
 };
 
-struct NeighbourhoodPerformance {
-    NeighbourhoodType type;
-    float performance;
-};
-
 class Solver {
 public:
 
@@ -42,6 +37,7 @@ public:
     std::vector<float> mBestFromNew;
     std::vector<float> mAvgFromNew;
     std::vector<float> mWorstFromNew;
+    std::vector<NeighbourhoodType> mBestNewNeighbourhood;
 
 
 
