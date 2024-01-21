@@ -29,8 +29,8 @@ proporcjonalne sąsiedztwo
 basic in filename means no adaptive neighbourhood
 
 -----------------------------------------
-Adaptacyjne - z pokolenia na pokolenie: rankingowe: czyli każdemu daję po jednym miejscu, a potem rozdzielam na bazie performance'u miejsca (czyli najlepszy w iteracji dostanie w nagrode więcej miejsc, drugi najlepszy trochę mniej itp.)
-Dodać na wykresie które sąsiedztwo pracowało - wygrało ranking
+DONE Adaptacyjne - z pokolenia na pokolenie: rankingowe: czyli każdemu daję po jednym miejscu, a potem rozdzielam na bazie performance'u miejsca (czyli najlepszy w iteracji dostanie w nagrode więcej miejsc, drugi najlepszy trochę mniej itp.)
+DONE Dodać na wykresie które sąsiedztwo pracowało - wygrało ranking
 
-Puścić z losowym rankingiem - jako referencyjne wyniki
-Sprawdzić - czy zawsze zostają złamane te same sąsiedztwa!!!
+DONE Puścić z losowym rankingiem - jako referencyjne wyniki
+DONE Sprawdzić - czy zawsze zostają złamane te same sąsiedztwa!!!
