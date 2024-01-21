@@ -36,12 +36,22 @@ int main(int argc, char *argv[]) {
         auto end = std::chrono::high_resolution_clock::now();
         std::chrono::duration<double> elapsed = end - start;
 
-        parser.saveResultsCSV("basic_" + xmlFile, configFile, i, solver);
-
-
         std::string resultsFileTXT =
                 "basic_metaresults" + nameOnlyXML + "_" + nameOnlyConfig + "_" + std::to_string(i) + ".txt";
-        std::ofstream file(resultsFileTXT);  // Otwieranie pliku do zapisu
+
+        if (solver.mProblem.mParams.isAdaptive){
+            parser.saveResultsCSV(xmlFile, configFile, i, solver);
+            resultsFileTXT =
+                    "metaresults" + nameOnlyXML + "_" + nameOnlyConfig + "_" + std::to_string(i) + ".txt";
+
+        }else{
+            parser.saveResultsCSV("basic_" + xmlFile, configFile, i, solver);
+        }
+
+
+
+
+        std::ofstream file(resultsFileTXT);
         if (file.is_open()) {
             std::cout << solver.mSolution.mFitness << std::endl;
             file << solver.mSolution.mFitness << std::endl;

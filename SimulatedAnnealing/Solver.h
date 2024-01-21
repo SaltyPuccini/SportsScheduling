@@ -7,6 +7,11 @@ enum NeighbourhoodType {
     Home, Rounds, Teams, PRounds, PTeams, PartialTeamsP
 };
 
+struct NeighbourhoodPerformance {
+    NeighbourhoodType type;
+    float performance;
+};
+
 class Solver {
 public:
 
