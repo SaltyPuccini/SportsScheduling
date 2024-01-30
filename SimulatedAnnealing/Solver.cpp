@@ -49,24 +49,6 @@ void Solver::initiateRandomSolution() {
     mSolution = solution;
 }
 
-bool AreSchedulesEqual(const tSchedule &schedule1, const tSchedule &schedule2) {
-    for (size_t i = 0; i < schedule1.size(); ++i) {
-        const tMeetings &round1 = schedule1[i];
-        const tMeetings &round2 = schedule2[i];
-
-        for (size_t j = 0; j < round1.size(); ++j) {
-            const Meeting &meeting1 = round1[j];
-            const Meeting &meeting2 = round2[j];
-
-            if (meeting1.home != meeting2.home || meeting1.away != meeting2.away) {
-                return false;
-            }
-        }
-    }
-
-    return true;
-}
-
 //PARTIAL SWAP ROUNDS
 bool RefineTeamsSet(Solution &solution, int roundIndex, std::set<int> &Ts) {
     bool any_change = false;
@@ -105,7 +87,6 @@ void Solver::partialSwapRounds(Solution &solution) {
     Solution s;
     s.copyMSchedule(solution.mSchedule);
 
-    //Losowanie
     int ri, rj;
     do {
         ri = distRounds(gen);
@@ -137,7 +118,7 @@ void Solver::partialSwapRounds(Solution &solution) {
             }
         }
 
-        // Znajdź mecze do zamiany w rundzie rj
+        // find meetings to swap in round rj
         std::vector<Meeting *> meetingsToSwapRj;
         for (auto &meeting: solution.mSchedule[rj]) {
             if (Ts.find(meeting.home) != Ts.end() || Ts.find(meeting.away) != Ts.end()) {
@@ -146,12 +127,11 @@ void Solver::partialSwapRounds(Solution &solution) {
         }
 
 
-        // Zamień mecze
+        // Swap meetings
         if (meetingsToSwapRi.size() == meetingsToSwapRj.size()) {
             for (size_t i = 0; i < meetingsToSwapRi.size(); ++i) {
                 std::swap(*meetingsToSwapRi[i], *meetingsToSwapRj[i]);
             }
-            auto temp = AreSchedulesEqual(s.mSchedule, solution.mSchedule);
         }
     }
 }
@@ -197,7 +177,6 @@ void Solver::partialSwapTeams(Solution &solution, bool phased) {
     Solution s;
     s.copyMSchedule(solution.mSchedule);
 
-    //Losowanie
     int ti, tj;
     do {
         ti = distTeams(gen);
@@ -277,7 +256,6 @@ void Solver::swapHomes(Solution &solution) {
 
 void Solver::anneal() {
     unsigned int allCounter = 0;
-    unsigned int lastGlobalImprovement = 0;
     auto neighbourhoods = {Home, Rounds, Teams, PRounds, PTeams, PartialTeamsP};
 
 
@@ -303,13 +281,13 @@ void Solver::anneal() {
     auto temperature = mProblem.mParams.tStart;
     while (allCounter < mProblem.mParams.iterations) {
 
-        //Archiwizuję aktualne rozwiązanie
+        //Archiving the current solution
         mCurr.push_back(currSolution.mFitness);
         mTemperatureArchive.push_back(temperature);
 
 
 
-        //Tworzę wektor z kopiami aktualnego rozwiązania
+        //Create a vector with copies of the current solution
         std::vector<std::pair<NeighbourhoodType, Solution>> neighboursVector;
         for (const auto &neighbourhood: neighbourhoods) {
             for (int i = 0; i < neighbourhoodSize[neighbourhood]; ++i) {
@@ -319,7 +297,7 @@ void Solver::anneal() {
             }
         }
 
-        //Generuję sąsiedztwa i je ewaluuję
+        //Generate neighborhoods and evaluate them
         for (auto &pair: neighboursVector) {
             switch (pair.first) {
                 case Home:
@@ -347,7 +325,7 @@ void Solver::anneal() {
             evaluate(pair.second);
         }
 
-        //Sortuję je od największego fitnessu
+        //Sort them by highest fitness level
         std::sort(neighboursVector.begin(), neighboursVector.end(),
                   [](std::pair<NeighbourhoodType, Solution> a, std::pair<NeighbourhoodType, Solution> b) {
                       return a.second.mFitness < b.second.mFitness;
@@ -359,14 +337,14 @@ void Solver::anneal() {
             size--;
         }
 
-        //Mierzenie performance'u
+        //Measuring performance
         if (mProblem.mParams.isAdaptive) {
             std::map<NeighbourhoodType, int> bestPositions;
 
             for (int i = 0; i < neighboursVector.size(); ++i) {
                 NeighbourhoodType currentType = neighboursVector[i].first;
 
-                // Jeśli typ sąsiedztwa nie został jeszcze dodany do mapy, dodaj go z aktualną pozycją
+                //If the neighborhood type has not yet been added to the map, add it with the current position
                 if (bestPositions.find(currentType) == bestPositions.end()) {
                     bestPositions[currentType] = i;
                 }
@@ -396,7 +374,7 @@ void Solver::anneal() {
                 neighbourhoodSize[sortedBestPositions[0].first] +=
                         neighbourhoodSize.size() * mProblem.mParams.neighbourhoodSize - totalSize;
             }
-        } else {
+        } else if (!mProblem.mParams.isBasic) {
             for (auto pair: neighbourhoodSize) {
                 std::uniform_int_distribution<> dist(0, size);
                 auto generatedNumber = dist(gen);
@@ -406,13 +384,17 @@ void Solver::anneal() {
             if (neighbourhoodSize.size() * mProblem.mParams.neighbourhoodSize - size > 0) {
                 neighbourhoodSize[begin(neighbourhoodSize)->first] += size;
             }
+        }else{
+            for (const auto &neighbourhood: neighbourhoods) {
+                neighbourhoodSize[neighbourhood] = mProblem.mParams.neighbourhoodSize;
+            }
         }
 
-        //Wybieram najlepsze z nowych rozwiązań.
+        //Choose the best of new solutions..
         bestNew.setMSchedule(neighboursVector.front().second.mSchedule);
         bestNew.setMFitness(neighboursVector.front().second.mFitness);
 
-        //Archiwizuję najlepsze, najgorsze i średnie.
+        //Archive the best, worst and average.
         float sumFitness = 0.0f;
         for (const auto &pair: neighboursVector) {
             sumFitness += pair.second.mFitness;
@@ -425,20 +407,19 @@ void Solver::anneal() {
         mBestNewNeighbourhood.push_back(neighboursVector.front().first);
 
 
-        //Jeśli nowe najlepsze, jest lepsze niż aktualne, akceptuję je jako currSolution
+        //If the new best is better than the current one, I accept it as a currSolution
         if (bestNew.mFitness < currSolution.mFitness) {
             auto a = 1;
             currSolution.setMSchedule(bestNew.mSchedule);
             currSolution.setMFitness(bestNew.mFitness);
 
-            //Przy okazji sprawdzam, czy jest najlepszym globalnym rozwiązaniem
+            //I check whether it is the best global solution
             if (currSolution.mFitness < bestGlobalSolution.mFitness) {
                 bestGlobalSolution.setMSchedule(currSolution.mSchedule);
                 bestGlobalSolution.setMFitness(currSolution.mFitness);
-                lastGlobalImprovement = allCounter;
             }
         }
-            //w przeciwnym wypadku, akceptuję je jako nowe z pewną dozą prawdopodobieństwa
+            //Otherwise, I accept them as new with some degree of probability
         else {
             double randomNumber = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
             double valueToChangeSolution = exp(
@@ -451,16 +432,16 @@ void Solver::anneal() {
 
         allCounter++;
 
-        //Archiwizuję globalnie najlepsze rozwiązanie.
+        //Archive the best solution globally.
         mBest.push_back(bestGlobalSolution.mFitness);
 
-        //Zwalniam pamięć
+        //Freeing memory
         neighboursVector.clear();
 
-        //Zmniejszam temperaturę
+        //Reduce the temperature
         temperature = temperature * mProblem.mParams.coolingRate;
     }
-    //Jako Solution obiektu solver na koniec ustawiam najlepsze znalezione
+    //The best found solution is saved as the mSolution
     mSolution.setMSchedule(bestGlobalSolution.mSchedule);
     mSolution.setMFitness(bestGlobalSolution.mFitness);
 }

@@ -12,14 +12,11 @@ public:
     int mTeams;
     ConstraintType mType;
 
-    // Constructor
     ConstraintCA1(int max, int min, Mode mode, int penalty,
                   const std::vector<int> slots, int teams, ConstraintType type);
 
-    // Destructor
     ~ConstraintCA1();
 
-    // Violation check
     bool isViolated(Solution &solution) const override;
     bool isHard() const override;
 };

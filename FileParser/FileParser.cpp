@@ -90,19 +90,15 @@ void parseGameConstraints(const pugi::xml_node &gameConstraintsNode,
         int min = constraintNode.attribute("min").as_int();
         int penalty = constraintNode.attribute("penalty").as_int();
 
-        //Parse slots
         std::vector<int> slots;
         parseLocalSlots(slots, constraintNode);
 
-        //Parse ConstraintType
         ConstraintType constraintType;
         parseLocalConstraintType(constraintType, constraintNode);
 
-        //Parse Meeting
         tMeetings meetings;
         parseLocalMeetings(meetings, constraintNode);
 
-        // Create ConstraintGA1 object and add to constraints vector
         constraints.push_back(std::make_shared<ConstraintGA1>(max, meetings, min, penalty, slots, constraintType));
     }
 }
@@ -117,23 +113,18 @@ void parseBreakConstraints(const pugi::xml_node &breakConstraintsNode,
         int penalty = constraintNode.attribute("penalty").as_int();
         int team = constraintNode.attribute("teams").as_int();
 
-        //Parse slots
         std::vector<int> slots;
         parseLocalSlots(slots, constraintNode);
 
-        //Parse ConstraintType
         ConstraintType constraintType;
         parseLocalConstraintType(constraintType, constraintNode);
 
-        //Parse mode1
         Mode mode1;
         parseLocalMode(mode1, constraintNode, "mode1");
 
-        //Parse mode2
         Mode mode2;
         parseLocalMode(mode2, constraintNode, "mode2");
 
-        // Create ConstraintBR1 object and add to constraints vector
         constraints.push_back(
                 std::make_shared<ConstraintBR1>(intp, mode1, mode2, penalty, slots, team, constraintType));
     }
@@ -145,26 +136,21 @@ void parseBreakConstraints(const pugi::xml_node &breakConstraintsNode,
         int intp = constraintNode.attribute("intp").as_int();
         int penalty = constraintNode.attribute("penalty").as_int();
 
-        //Parse slots
         std::vector<int> slots;
         parseLocalSlots(slots, constraintNode);
 
-        //Parse teams
         std::vector<int> teams;
         parseLocalTeams(teams, constraintNode, "teams");
 
-        //Parse ConstraintType
         ConstraintType constraintType;
         parseLocalConstraintType(constraintType, constraintNode);
 
-        //Parse homeMode
         Mode homeMode;
         parseLocalMode(homeMode, constraintNode, "homeMode");
 
         Mode mode2;
         parseLocalMode(mode2, constraintNode, "mode2");
 
-        // Create ConstraintBR2 object and add to constraints vector
         constraints.push_back(
                 std::make_shared<ConstraintBR2>(intp, homeMode, mode2, penalty, slots, teams, constraintType));
     }
@@ -178,19 +164,15 @@ void parseSeparationConstraints(const pugi::xml_node &separationConstraintsNode,
         int min = constraintNode.attribute("min").as_int();
         int penalty = constraintNode.attribute("penalty").as_int();
 
-        //Parse teams
         std::vector<int> teams;
         parseLocalTeams(teams, constraintNode, "teams");
 
-        //Parse ConstraintType
         ConstraintType constraintType;
         parseLocalConstraintType(constraintType, constraintNode);
 
-        //Parse mode1
         Mode mode1;
         parseLocalMode(mode1, constraintNode, "mode1");
 
-        // Create ConstraintSE1 object and add to constraints vector
         constraints.push_back(
                 std::make_shared<ConstraintSE1>(mode1, min, penalty, teams, constraintType));
     }
@@ -204,23 +186,18 @@ void parseFairnessConstraints(const pugi::xml_node &fairnessConstraintsNode,
         int intp = constraintNode.attribute("intp").as_int();
         int penalty = constraintNode.attribute("penalty").as_int();
 
-        //Parse slots
         std::vector<int> slots;
         parseLocalSlots(slots, constraintNode);
 
-        //Parse teams
         std::vector<int> teams;
         parseLocalTeams(teams, constraintNode, "teams");
 
-        //Parse ConstraintType
         ConstraintType constraintType;
         parseLocalConstraintType(constraintType, constraintNode);
 
-        //Parse mode
         Mode mode;
         parseLocalMode(mode, constraintNode, "mode");
 
-        // Create ConstraintFA2 object and add to constraints vector
         constraints.push_back(
                 std::make_shared<ConstraintFA2>(intp, mode, penalty, slots, teams, constraintType));
     }
@@ -237,19 +214,15 @@ void parseCapacityConstraints(const pugi::xml_node &capacityConstraintsNode,
         int penalty = constraintNode.attribute("penalty").as_int();
         int team = constraintNode.attribute("teams").as_int();
 
-        //Parse slots
         std::vector<int> slots;
         parseLocalSlots(slots, constraintNode);
 
-        //Parse ConstraintType
         ConstraintType constraintType;
         parseLocalConstraintType(constraintType, constraintNode);
 
-        //Parse mode
         Mode mode;
         parseLocalMode(mode, constraintNode, "mode");
 
-        // Create ConstraintCA1 object and add to constraints vector
         constraints.push_back(
                 std::make_shared<ConstraintCA1>(max, min, mode, penalty, slots, team, constraintType));
     }
@@ -263,26 +236,21 @@ void parseCapacityConstraints(const pugi::xml_node &capacityConstraintsNode,
         int penalty = constraintNode.attribute("penalty").as_int();
         int teams1 = constraintNode.attribute("teams1").as_int();
 
-        //Parse teams
         std::vector<int> teams2;
         parseLocalTeams(teams2, constraintNode, "teams2");
 
-        //Parse slots
         std::vector<int> slots;
         parseLocalSlots(slots, constraintNode);
 
-        //Parse ConstraintType
         ConstraintType constraintType;
         parseLocalConstraintType(constraintType, constraintNode);
 
-        //Parse mode
         Mode mode1;
         parseLocalMode(mode1, constraintNode, "mode1");
 
         Mode mode2;
         parseLocalMode(mode2, constraintNode, "mode2");
 
-        // Create ConstraintCA2 object and add to constraints vector
         constraints.push_back(
                 std::make_shared<ConstraintCA2>(max, min, mode1, mode2, penalty, slots, teams1, teams2,
                                                 constraintType));
@@ -297,26 +265,21 @@ void parseCapacityConstraints(const pugi::xml_node &capacityConstraintsNode,
         int penalty = constraintNode.attribute("penalty").as_int();
         int intp = constraintNode.attribute("intp").as_int();
 
-        //Parse teams
         std::vector<int> teams1;
         parseLocalTeams(teams1, constraintNode, "teams1");
 
-        //Parse teams
         std::vector<int> teams2;
         parseLocalTeams(teams2, constraintNode, "teams2");
 
-        //Parse ConstraintType
         ConstraintType constraintType;
         parseLocalConstraintType(constraintType, constraintNode);
 
-        //Parse mode
         Mode mode1;
         parseLocalMode(mode1, constraintNode, "mode1");
 
         Mode mode2;
         parseLocalMode(mode2, constraintNode, "mode2");
 
-        // Create ConstraintCA3 object and add to constraints vector
         constraints.push_back(
                 std::make_shared<ConstraintCA3>(intp, max, min, mode1, mode2, penalty, teams1, teams2, constraintType));
     }
@@ -329,30 +292,24 @@ void parseCapacityConstraints(const pugi::xml_node &capacityConstraintsNode,
         int min = constraintNode.attribute("min").as_int();
         int penalty = constraintNode.attribute("penalty").as_int();
 
-        //Parse teams
         std::vector<int> teams1;
         parseLocalTeams(teams1, constraintNode, "teams1");
 
-        //Parse teams
         std::vector<int> teams2;
         parseLocalTeams(teams2, constraintNode, "teams2");
 
-        //Parse slots
         std::vector<int> slots;
         parseLocalSlots(slots, constraintNode);
 
-        //Parse ConstraintType
         ConstraintType constraintType;
         parseLocalConstraintType(constraintType, constraintNode);
 
-        //Parse mode
         Mode mode1;
         parseLocalMode(mode1, constraintNode, "mode1");
 
         Mode mode2;
         parseLocalMode(mode2, constraintNode, "mode2");
 
-        // Create ConstraintCA3 object and add to constraints vector
         constraints.push_back(
                 std::make_shared<ConstraintCA4>(max, min, mode1, mode2, penalty, slots, teams1, teams2,
                                                 constraintType));
@@ -441,30 +398,6 @@ void FileParser::parseXML(const std::string &filename, Problem &problem) {
     problem.mConstraints = constraints;
 }
 
-std::vector<int> FileParser::parseConfig(const std::string &weightFile) {
-    int hardConstraints = 1;
-    int softConstraints = 1;
-    std::ifstream configFile(weightFile);
-    std::string line;
-
-    if (configFile.is_open()) {
-        while (getline(configFile, line)) {
-            std::istringstream iss(line);
-            std::string key;
-            int value;
-
-            if (iss >> key >> value) {
-                if (key == "hardConstraints") {
-                    hardConstraints = value;
-                } else if (key == "softConstraints") {
-                    softConstraints = value;
-                }
-            }
-        }
-    }
-    std::vector<int> intVector = {softConstraints, hardConstraints};
-    return intVector;
-}
 
 bool FileParser::parseSAConfig(const std::string &filename, paramsSA &params, std::vector<int> &intVector) {
 
@@ -494,6 +427,8 @@ bool FileParser::parseSAConfig(const std::string &filename, paramsSA &params, st
                     softConstraints = value;
                 } else if (key == "isAdaptive") {
                     params.isAdaptive = value;
+                } else if (key == "isBasic") {
+                    params.isBasic = value;
                 }
             }
         }
@@ -543,9 +478,7 @@ void FileParser::saveResultsCSV(const std::string &nameOnlyXML, const std::strin
 
     file << "overallLoop,temperature,curr,bestFromNew,avgFromNew,worstFromNew,bestNewNeighbourhood,overallBest\n";
 
-    // Check if all vectors have the same size
     size_t n = solver.mBest.size();
-    // Write the data
     for (size_t line = 0; line < n; line++) {
         file << line << ","
              << std::setprecision(4) << solver.mTemperatureArchive[line] << ","

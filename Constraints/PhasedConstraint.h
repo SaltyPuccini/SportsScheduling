@@ -10,10 +10,8 @@ public:
     std::vector<int> mSlots;
     ConstraintType mType;
 
-    // Destructor
     ~PhasedConstraint();
 
-    // Violation check
     bool isViolated(Solution &solution) const override;
     bool isHard() const override;
 };

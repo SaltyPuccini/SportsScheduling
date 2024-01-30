@@ -4,4 +4,5 @@ struct paramsSA{
     float coolingRate;
     int neighbourhoodSize;
     bool isAdaptive;
+    bool isBasic;
 };

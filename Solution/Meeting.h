@@ -26,12 +26,6 @@ struct Meeting {
         return ((home == team) || (away == team));
     }
 
-    int whoIsEnemy(const int &team) {
-        if (home == team)
-            return away;
-        return home;
-    }
-
     bool isHome(const int &team) {
         if (home == team) {
             return true;

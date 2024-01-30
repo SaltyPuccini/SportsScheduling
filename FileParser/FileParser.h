@@ -20,7 +20,7 @@
 #include "../SimulatedAnnealing/Solver.h"
 
 class FileParser {
-
+public:
     void parseSlots(std::vector<int> &slots, const pugi::xml_document &doc);
 
     void parseTeams(std::vector<int> &teams, const pugi::xml_document &doc);
@@ -30,11 +30,9 @@ class FileParser {
     void parsePhased(const pugi::xml_document &doc, std::vector<std::shared_ptr<IConstraint>> &constraints,
                      std::vector<int> teams, std::vector<int> slots);
 
-public:
     bool mIsPhased;
     std::map<NeighbourhoodType,std::string> neighbourhoods;
 
-    std::vector<int> parseConfig(const std::string &weightFile);
 
     void parseXML(const std::string &filename, Problem &problem);
 

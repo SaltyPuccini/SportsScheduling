@@ -11,12 +11,10 @@ public:
     int mTeams;
     ConstraintType mType;
 
-    // Constructor
     ConstraintBR1(int intp, Mode mode1, Mode mode2, int penalty,
                   const std::vector<int> slots, int teams,
                   ConstraintType type);
 
-    // Destructor
     ~ConstraintBR1();
 
     bool isViolated(Solution &solution) const override;

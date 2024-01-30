@@ -12,9 +12,6 @@ constraints[0] is always the basicConstraint (the basic assumptions of the probl
 if phased, constraints[1] is phasedConstraint
 both returning only true/false
 
-TODO:
-    Save iteration info to .csv
-
 Sparametryzować!!!
 
 Ilość iteracji z góry określona! Temperatura mierzona przy okazji.
